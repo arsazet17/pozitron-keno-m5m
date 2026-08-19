@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#071425">
+  <meta name="color-scheme" content="dark">
+  <title>M5M</title>
+  <meta name="description" content="M5M — отдельное приложение КЕНО на базе стабильной схемы M4">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="style.css?v=m5m001">
+  <link rel="stylesheet" href="scanner.css?v=m5m001">
+</head>
+<body>
+<div id="m5mSplash" class="m5m-splash" aria-hidden="true">
+  <img src="assets/m5m-splash.png" alt="">
+</div>
+<div class="shell">
+  <header class="topbar">
+    <div class="brand"><img src="icons/icon-192.png" alt=""><div><b>M5M</b><span>Отдельная ветка · столбы 1–10</span></div></div>
+    <div class="top-actions"><div class="top-meta"><div id="appVersionTop" class="version-badge">v0.1.0-M5M</div><div id="archiveStatus" class="status">Загрузка архива…</div></div><button id="forceUpdate" class="update-btn" type="button">⟳ Обновить</button></div>
+  </header>
+
+  <main id="pages" class="pages">
+    <section class="page active" data-page="home">
+      <section class="hero card">
+        <div><div class="eyebrow">Следующий тираж</div><div id="targetTime" class="time">—</div><div id="targetDate" class="muted">—</div><div id="targetDraw" class="draw-no">Тираж №—</div></div>
+        <button id="recalc" class="ghost">↻ Пересчитать</button>
+      </section>
+
+      <section class="card main-forecast">
+        <div class="title-row"><div><div class="eyebrow gold">ОСНОВНОЙ ПРОГНОЗ</div><h2>Вариант 1</h2></div><span class="pill">3 столба</span></div>
+        <div class="triple" id="v1Balls"></div>
+        <div class="small muted">Строгий отбор: охват методов → общая частота → глубина цепочек. Свежесть не используется.</div>
+        <div id="consensusBox" class="consensus none"><strong>Полного согласования нет</strong></div>
+      </section>
+
+      <div class="two">
+        <section class="card mini"><div class="eyebrow">Вариант 2</div><div id="v2Value" class="big-number">—</div><div class="small muted">частота · при ничьей строго −1 длина</div></section>
+        <section class="card mini purple"><div class="eyebrow">Доп. Г/Г</div><div id="ggValue" class="big-number">—</div><div class="small muted">строго −1 · без свежести</div></section>
+      </div>
+
+      <section class="card scanner-card">
+        <div class="title-row"><div><div class="eyebrow">Контроль прогноза</div><h2>🔎 Сканер столбов</h2></div><span class="pill cyan">ТОЛЬКО ПРОГНОЗ</span></div>
+        <div id="forecastScanner"><div class="scanner-empty">Ожидаю расчёт прогноза…</div></div>
+      </section>
+
+      <section class="card time-card">
+        <div class="title-row"><div><div class="eyebrow gold">История попаданий</div><h2>⏱ Рекомендация по времени</h2></div><span class="pill">3 сигнала</span></div>
+        <div id="timeAdvice" class="time-advice-list"><div class="scanner-empty">Загрузка временной статистики…</div></div>
+        <div id="timeStatsMeta" class="small muted time-stats-meta"></div>
+      </section>
+
+      <section class="card">
+        <div class="title-row"><h2>Новые цепочки</h2><span class="pill cyan">6 значений</span></div>
+        <div class="chain-row"><span>↕ Вертикаль</span><b id="vChain" class="chain">—</b><i id="vChainLen" hidden>—</i></div>
+        <div class="chain-row"><span>↔ Горизонталь</span><b id="hChain" class="chain">—</b><i id="hChainLen" hidden>—</i></div>
+      </section>
+
+      <section class="card"><div class="title-row"><h2>4 метода</h2><span class="pill cyan">В/В · В/Г · Г/В · Г/Г</span></div><div id="methods"></div></section>
+    </section>
+
+    <section class="page" data-page="stats">
+      <div class="page-head"><div><div class="eyebrow">По фактам Столото</div><h1>Статистика</h1></div></div>
+      <section class="card stats-simple-card">
+        <div class="stats-simple-head">
+          <span>ТИРАЖ</span><span>ДАТА</span><span>ВРЕМЯ</span><span>ИТОГ</span><span></span>
+        </div>
+        <div id="dayAccordion" class="day-accordion"></div>
+      </section>
+    </section>
+
+    <section class="page" data-page="archive">
+      <div class="page-head"><div><div class="eyebrow">Живой рабочий файл</div><h1>Архив</h1></div><span class="pill cyan">EXCEL</span></div>
+      <section class="card excel"><div class="excel-icon">X</div><div><b>m5m_stolby_po_date_vremeni.xlsx</b><span class="small muted">Новые результаты сохраняются на устройстве и добавляются в выгрузку.</span></div></section>
+      <section class="card"><h2>Фактический результат</h2><div class="result-row"><select id="resultTime"></select><input id="resultValue" type="number" min="1" max="10" inputmode="numeric" placeholder="1–10"><button id="saveResult" class="good">Зафиксировать</button></div><div id="lastCheck" class="note"></div></section>
+      <section class="card"><h2>Excel</h2><div class="controls"><button id="exportXlsx" class="primary">⬇ Выгрузить Excel</button><label class="file-label">📂 Загрузить Excel<input id="importXlsx" type="file" accept=".xlsx,.xls"></label></div><div class="note">Выгрузка создаёт актуальный Excel с внесёнными фактическими результатами.</div></section>
+    </section>
+
+    <section class="page" data-page="settings">
+      <div class="page-head"><div><div class="eyebrow">Приложение</div><h1>Настройки</h1></div><span class="pill">v0.1.0-M5M</span></div>
+      <section class="card about"><img src="icons/icon-192.png" alt=""><div><h2>M5M</h2><p class="muted">Независимый клон стабильного M4. Здесь можно менять и добавлять новый алгоритм, не затрагивая рабочее M4.</p></div></section>
+      <section class="card"><h2>Строгие правила</h2><p class="muted">4 метода считаются только по основному архиву. Первичная цепочка сокращается 6→5→4… только слева до первого совпадения. Вариант 1: охват методов → общая частота → глубина цепочек. Вариант 2 и Доп. Г/Г при ничьей сокращаются ровно на одну длину за раунд. Свежесть и давность совпадений не используются как критерий.</p></section>
+      <section class="card"><h2>Сканер</h2><p class="muted">Сканер проверяет только столбы, уже выданные текущим прогнозом. Новые столбы сканер не добавляет. Временная рекомендация строится по историческому бэктесту тех же строгих правил для трёх совпадений: В1+В2+Доп., В1+В2 и В1+Доп.</p></section>
+      <section class="card"><h2>Навигация</h2><p class="muted">Переход между страницами работает только нижними кнопками. Свайп между страницами отключён.</p></section>
+      <section class="card"><h2>Текущее расписание</h2><div id="scheduleList" class="chips"></div></section>
+      <section class="card"><h2>Установка</h2><p class="muted">После публикации GitHub Pages приложение можно установить на главный экран телефона как PWA.</p></section>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-target="home"><span>⌂</span><small>Главная</small></button>
+    <button class="nav-btn" data-target="stats"><span>▥</span><small>Статистика</small></button>
+    <button class="nav-btn" data-target="archive"><span>▤</span><small>Архив</small></button>
+    <button class="nav-btn" data-target="settings"><span>⚙</span><small>Настройки</small></button>
+  </nav>
+</div>
+<div id="toast" class="toast"></div>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="engine.js?v=m5m001"></script>
+<script src="today-override.js?v=m5m001"></script>
+<script src="app.js?v=m5m001"></script>
+<script src="scanner.js?v=m5m001"></script>
+<script src="navigation.js?v=m5m001"></script>
+
+<script>
+(() => {
+  const splash=document.getElementById('m5mSplash');
+  if(!splash) return;
+  window.setTimeout(()=>splash.classList.add('m5m-splash-hide'),1250);
+  window.setTimeout(()=>splash.remove(),1900);
+})();
+</script>
+</body></html>
