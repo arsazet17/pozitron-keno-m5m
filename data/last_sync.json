@@ -1,22 +1,15 @@
 {
-  "updatedAt": "2026-08-19T17:31:20Z",
+  "updatedAt": "2026-08-19T17:35:56Z",
   "source": "Официальный Столото OAuth · M5M standalone · tail10",
   "stableDraws": 10,
   "checkedTail": 10,
-  "confirmedExisting": 9,
-  "added": 1,
+  "confirmedExisting": 10,
+  "added": 0,
   "latestOfficial": {
     "draw": 325836,
     "date": "19.08.26",
     "time": "20:17",
     "column": 6
   },
-  "addedRows": [
-    {
-      "draw": 325836,
-      "date": "19.08.26",
-      "time": "20:17",
-      "column": 6
-    }
-  ]
+  "addedRows": []
 }
