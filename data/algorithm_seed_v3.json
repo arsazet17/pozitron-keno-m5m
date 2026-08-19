@@ -1,0 +1,2679 @@
+{
+  "version": 3,
+  "note": "Проверенные предтиражные RAW-снимки до 18:32. Они используются только как стартовая обучающая база M5; новые записи фиксируются автоматически ДО факта.",
+  "snapshots": {
+    "19.08.26|17:17": {
+      "version": 3,
+      "key": "19.08.26|17:17",
+      "date": "19.08.26",
+      "weekday": "среда",
+      "time": "17:17",
+      "capturedAt": "2026-08-19T00:00:00Z",
+      "vChain": [],
+      "hChain": [],
+      "methods": {
+        "В→В": {
+          "usedLen": 4,
+          "usedChain": [
+            5,
+            9,
+            2,
+            5
+          ],
+          "counts": {
+            "1": 2,
+            "5": 1,
+            "9": 1,
+            "10": 1
+          }
+        },
+        "В→Г": {
+          "usedLen": 3,
+          "usedChain": [
+            9,
+            2,
+            5
+          ],
+          "counts": {
+            "5": 5,
+            "4": 4,
+            "8": 4,
+            "1": 3,
+            "9": 3,
+            "2": 2,
+            "3": 2,
+            "10": 2,
+            "6": 1,
+            "7": 1
+          }
+        },
+        "Г→В": {
+          "usedLen": 3,
+          "usedChain": [
+            1,
+            3,
+            1
+          ],
+          "counts": {
+            "6": 6,
+            "2": 4,
+            "5": 4,
+            "8": 4,
+            "1": 3,
+            "4": 2,
+            "7": 2,
+            "9": 1,
+            "10": 1
+          }
+        },
+        "Г→Г": {
+          "usedLen": 4,
+          "usedChain": [
+            7,
+            1,
+            3,
+            1
+          ],
+          "counts": {
+            "1": 1,
+            "3": 1,
+            "6": 1,
+            "10": 1
+          }
+        }
+      },
+      "repeats": [
+        {
+          "label": "🔵",
+          "value": 5
+        },
+        {
+          "label": "🌸",
+          "value": 2
+        },
+        {
+          "label": "🟢",
+          "value": 3
+        },
+        {
+          "label": "🟠",
+          "value": 5
+        },
+        {
+          "label": "💗",
+          "value": 1
+        },
+        {
+          "label": "🔴",
+          "value": 3
+        }
+      ],
+      "candidates": {
+        "1": {
+          "value": 1,
+          "methods": [
+            "В→В",
+            "В→Г",
+            "Г→В",
+            "Г→Г"
+          ],
+          "coverage": 4,
+          "raw_total": 9,
+          "depth": 14,
+          "repeats": [
+            "💗"
+          ],
+          "repeat_count": 1,
+          "methodMask": 15,
+          "repeatMask": 16,
+          "classKey": "15:3+:9+:16"
+        },
+        "2": {
+          "value": 2,
+          "methods": [
+            "В→Г",
+            "Г→В"
+          ],
+          "coverage": 2,
+          "raw_total": 6,
+          "depth": 6,
+          "repeats": [
+            "🌸"
+          ],
+          "repeat_count": 1,
+          "methodMask": 6,
+          "repeatMask": 2,
+          "classKey": "6:3+:5-8:2"
+        },
+        "3": {
+          "value": 3,
+          "methods": [
+            "В→Г",
+            "Г→Г"
+          ],
+          "coverage": 2,
+          "raw_total": 3,
+          "depth": 7,
+          "repeats": [
+            "🟢",
+            "🔴"
+          ],
+          "repeat_count": 2,
+          "methodMask": 10,
+          "repeatMask": 36,
+          "classKey": "10:3+:5-8:36"
+        },
+        "4": {
+          "value": 4,
+          "methods": [
+            "В→Г",
+            "Г→В"
+          ],
+          "coverage": 2,
+          "raw_total": 6,
+          "depth": 6,
+          "repeats": [],
+          "repeat_count": 0,
+          "methodMask": 6,
+          "repeatMask": 0,
+          "classKey": "6:3+:5-8:0"
+        },
+        "5": {
+          "value": 5,
+          "methods": [
+            "В→В",
+            "В→Г",
+            "Г→В"
+          ],
+          "coverage": 3,
+          "raw_total": 10,
+          "depth": 10,
+          "repeats": [
+            "🔵",
+            "🟠"
+          ],
+          "repeat_count": 2,
+          "methodMask": 7,
+          "repeatMask": 9,
+          "classKey": "7:3+:9+:9"
+        },
+        "6": {
+          "value": 6,
+          "methods": [
+            "В→Г",
+            "Г→В",
+            "Г→Г"
+          ],
+          "coverage": 3,
+          "raw_total": 8,
+          "depth": 10,
+          "repeats": [],
+          "repeat_count": 0,
+          "methodMask": 14,
+          "repeatMask": 0,
+          "classKey": "14:3+:9+:0"
+        },
+        "7": {
+          "value": 7,
+          "methods": [
+            "В→Г",
+            "Г→В"
+          ],
+          "coverage": 2,
+          "raw_total": 3,
+          "depth": 6,
+          "repeats": [],
+          "repeat_count": 0,
+          "methodMask": 6,
+          "repeatMask": 0,
+          "classKey": "6:3+:5-8:0"
+        },
+        "8": {
+          "value": 8,
+          "methods": [
+            "В→Г",
+            "Г→В"
+          ],
+          "coverage": 2,
+          "raw_total": 8,
+          "depth": 6,
+          "repeats": [],
+          "repeat_count": 0,
+          "methodMask": 6,
+          "repeatMask": 0,
+          "classKey": "6:3+:5-8:0"
+        },
+        "9": {
+          "value": 9,
+          "methods": [
+            "В→В",
+            "В→Г",
+            "Г→В"
+          ],
+          "coverage": 3,
+          "raw_total": 5,
+          "depth": 10,
+          "repeats": [],
+          "repeat_count": 0,
+          "methodMask": 7,
+          "repeatMask": 0,
+          "classKey": "7:3+:9+:0"
+        },
+        "10": {
+          "value": 10,
+          "methods": [
+            "В→В",
+            "В→Г",
+            "Г→В",
+            "Г→Г"
+          ],
+          "coverage": 4,
+          "raw_total": 5,
+          "depth": 14,
+          "repeats": [],
+          "repeat_count": 0,
+          "methodMask": 15,
+          "repeatMask": 0,
+          "classKey": "15:3+:9+:0"
+        }
+      },
+      "m5": {
+        "main": null,
+        "picks": [],
+        "reserve": [],
+        "ranking": [],
+        "model": {
+          "seed": true
+        }
+      }
+    },
+    "19.08.26|17:32": {
+      "version": 3,
+      "key": "19.08.26|17:32",
+      "date": "19.08.26",
+      "weekday": "среда",
+      "time": "17:32",
+      "capturedAt": "2026-08-19T00:00:00Z",
+      "vChain": [],
+      "hChain": [],
+      "methods": {
+        "В→В": {
+          "usedLen": 4,
+          "usedChain": [
+            9,
+            5,
+            4,
+            5
+          ],
+          "counts": {
+            "3": 1,
+            "6": 1,
+            "8": 1,
+            "2": 1
+          }
+        },
+        "В→Г": {
+          "usedLen": 5,
+          "usedChain": [
+            2,
+            9,
+            5,
+            4,
+            5
+          ],
+          "counts": {
+            "2": 1
+          }
+        },
+        "Г→В": {
+          "usedLen": 4,
+          "usedChain": [
+            1,
+            3,
+            1,
+            7
+          ],
+          "counts": {
+            "6": 1,
+            "3": 1
+          }
+        },
+        "Г→Г": {
+          "usedLen": 4,
+          "usedChain": [
+            1,
+            3,
+            1,
+            7
+          ],
+          "counts": {
+            "7": 2,
+            "8": 2,
+            "3": 1,
+            "4": 1,
+            "1": 1
+          }
+        }
+      },
+      "repeats": [
+        {
+          "label": "🔵",
+          "value": 5
+        },
+        {
+          "label": "🌸",
+          "value": 4
+        },
+        {
+          "label": "🟢",
+          "value": 5
+        },
+        {
+          "label": "🟠",
+          "value": 3
+        },
+        {
+          "label": "💗",
+          "value": 7
+        },
+        {
+          "label": "🔴",
+          "value": 1
+        }
+      ],
+      "candidates": {
+        "1": {
+          "value": 1,
+          "methods": [
+            "Г→Г"
+          ],
+          "coverage": 1,
+          "raw_total": 1,
+          "depth": 4,
+          "repeats": [
+            "🔴"
+          ],
+          "repeat_count": 1,
+          "methodMask": 8,
+          "repeatMask": 32,
+          "classKey": "8:1:1-4:32"
+        },
+        "2": {
+          "value": 2,
+          "methods": [
+            "В→В",
+            "В→Г"
+          ],
+          "coverage": 2,
+          "raw_total": 2,
+          "depth": 9,
+          "repeats": [],
+          "repeat_count": 0,
+          "methodMask": 3,
+          "repeatMask": 0,
+          "classKey": "3:2:9+:0"
+        },
+        "3": {
+          "value": 3,
+          "methods": [
+            "В→В",
+            "Г→В",
+            "Г→Г"
+          ],
+          "coverage": 3,
+          "raw_total": 3,
+          "depth": 12,
+          "repeats": [
+            "🟠"
+          ],
+          "repeat_count": 1,
+          "methodMask": 13,
+          "repeatMask": 8,
+          "classKey": "13:3+:9+:8"
+        },
+        "4": {
+          "value": 4,
+          "methods": [
+            "Г→Г"
+          ],
+          "coverage": 1,
+          "raw_total": 1,
+          "depth": 4,
+          "repeats": [
+            "🌸"
+          ],
+          "repeat_count": 1,
+          "methodMask": 8,
+          "repeatMask": 2,
+          "classKey": "8:1:1-4:2"
+        },
+        "5": {
+          "value": 5,
+          "methods": [],
+          "coverage": 0,
+          "raw_total": 0,
+          "depth": 0,
+          "repeats": [
+            "🔵",
+            "🟢"
+          ],
+          "repeat_count": 2,
+          "methodMask": 0,
+          "repeatMask": 5,
+          "classKey": "0:0:0:5"
+        },
+        "6": {
+          "value": 6,
+          "methods": [
+            "В→В",
+            "Г→В"
+          ],
+          "coverage": 2,
+          "raw_total": 2,
+          "depth": 8,
+          "repeats": [],
+          "repeat_count": 0,
+          "methodMask": 5,
+          "repeatMask": 0,
+          "classKey": "5:2:5-8:0"
+        },
+        "7": {
+          "value": 7,
+          "methods": [
+            "Г→Г"
+          ],
+          "coverage": 1,
+          "raw_total": 2,
+          "depth": 4,
+          "repeats": [
+            "💗"
+          ],
+          "repeat_count": 1,
+          "methodMask": 8,
+          "repeatMask": 16,
+          "classKey": "8:2:1-4:16"
+        },
+        "8": {
+          "value": 8,
+          "methods": [
+            "В→В",
+            "Г→Г"
+          ],
+          "coverage": 2,
+          "raw_total": 3,
+          "depth": 8,
+          "repeats": [],
+          "repeat_count": 0,
+          "methodMask": 9,
+          "repeatMask": 0,
+          "classKey": "9:3+:5-8:0"
+        },
+        "9": {
+          "value": 9,
+          "methods": [],
+          "coverage": 0,
+          "raw_total": 0,
+          "depth": 0,
+          "repeats": [],
+          "repeat_count": 0,
+          "methodMask": 0,
+          "repeatMask": 0,
+          "classKey": "0:0:0:0"
+        },
+        "10": {
+          "value": 10,
+          "methods": [],
+          "coverage": 0,
+          "raw_total": 0,
+          "depth": 0,
+          "repeats": [],
+          "repeat_count": 0,
+          "methodMask": 0,
+          "repeatMask": 0,
+          "classKey": "0:0:0:0"
+        }
+      },
+      "m5": {
+        "main": null,
+        "picks": [],
+        "reserve": [],
+        "ranking": [],
+        "model": {
+          "seed": true
+        }
+      }
+    },
+    "19.08.26|18:02": {
+      "version": 3,
+      "key": "19.08.26|18:02",
+      "date": "19.08.26",
+      "weekday": "среда",
+      "time": "18:02",
+      "capturedAt": "2026-08-19T00:00:00Z",
+      "vChain": [],
+      "hChain": [],
+      "methods": {
+        "В→В": {
+          "usedLen": 4,
+          "usedChain": [
+            2,
+            2,
+            10,
+            3
+          ],
+          "counts": {
+            "5": 1,
+            "10": 1
+          }
+        },
+        "В→Г": {
+          "usedLen": 4,
+          "usedChain": [
+            2,
+            2,
+            10,
+            3
+          ],
+          "counts": {
+            "7": 1,
+            "9": 1
+          }
+        },
+        "Г→В": {
+          "usedLen": 5,
+          "usedChain": [
+            1,
+            3,
+            1,
+            7,
+            3
+          ],
+          "counts": {
+            "5": 1
+          }
+        },
+        "Г→Г": {
+          "usedLen": 5,
+          "usedChain": [
+            1,
+            3,
+            1,
+            7,
+            3
+          ],
+          "counts": {
+            "6": 1
+          }
+        }
+      },
+      "repeats": [
+        {
+          "label": "🔵",
+          "value": 3
+        },
+        {
+          "label": "🌸",
+          "value": 10
+        },
+        {
+          "label": "🟢",
+          "value": 5
+        },
+        {
+          "label": "🟠",
+          "value": 6
+        },
+        {
+          "label": "💗",
+          "value": 3
+        },
+        {
+          "label": "🔴",
+          "value": 7
+        }
+      ],
+      "candidates": {
+        "1": {
+          "value": 1,
+          "methods": [],
+          "coverage": 0,
+          "raw_total": 0,
+          "depth": 0,
+          "repeats": [],
+          "repeat_count": 0,
+          "methodMask": 0,
+          "repeatMask": 0,
+          "classKey": "0:0:0:0"
+        },
+        "2": {
+          "value": 2,
+          "methods": [],
+          "coverage": 0,
+          "raw_total": 0,
+          "depth": 0,
+          "repeats": [],
+          "repeat_count": 0,
+          "methodMask": 0,
+          "repeatMask": 0,
+          "classKey": "0:0:0:0"
+        },
+        "3": {
+          "value": 3,
+          "methods": [],
+          "coverage": 0,
+          "raw_total": 0,
+          "depth": 0,
+          "repeats": [
+            "🔵",
+            "💗"
+          ],
+          "repeat_count": 2,
+          "methodMask": 0,
+          "repeatMask": 17,
+          "classKey": "0:0:0:17"
+        },
+        "4": {
+          "value": 4,
+          "methods": [],
+          "coverage": 0,
+          "raw_total": 0,
+          "depth": 0,
+          "repeats": [],
+          "repeat_count": 0,
+          "methodMask": 0,
+          "repeatMask": 0,
+          "classKey": "0:0:0:0"
+        },
+        "5": {
+          "value": 5,
+          "methods": [
+            "В→В",
+            "Г→В"
+          ],
+          "coverage": 2,
+          "raw_total": 2,
+          "depth": 9,
+          "repeats": [
+            "🟢"
+          ],
+          "repeat_count": 1,
+          "methodMask": 5,
+          "repeatMask": 4,
+          "classKey": "5:2:9+:4"
+        },
+        "6": {
+          "value": 6,
+          "methods": [
+            "Г→Г"
+          ],
+          "coverage": 1,
+          "raw_total": 1,
+          "depth": 5,
+          "repeats": [
+            "🟠"
+          ],
+          "repeat_count": 1,
+          "methodMask": 8,
+          "repeatMask": 8,
+          "classKey": "8:1:5-8:8"
+        },
+        "7": {
+          "value": 7,
+          "methods": [
+            "В→Г"
+          ],
+          "coverage": 1,
+          "raw_total": 1,
+          "depth": 4,
+          "repeats": [
+            "🔴"
+          ],
+          "repeat_count": 1,
+          "methodMask": 2,
+          "repeatMask": 32,
+          "classKey": "2:1:1-4:32"
+        },
+        "8": {
+          "value": 8,
+          "methods": [],
+          "coverage": 0,
+          "raw_total": 0,
+          "depth": 0,
+          "repeats": [],
+          "repeat_count": 0,
+          "methodMask": 0,
+          "repeatMask": 0,
+          "classKey": "0:0:0:0"
+        },
+        "9": {
+          "value": 9,
+          "methods": [
+            "В→Г"
+          ],
+          "coverage": 1,
+          "raw_total": 1,
+          "depth": 4,
+          "repeats": [],
+          "repeat_count": 0,
+          "methodMask": 2,
+          "repeatMask": 0,
+          "classKey": "2:1:1-4:0"
+        },
+        "10": {
+          "value": 10,
+          "methods": [
+            "В→В"
+          ],
+          "coverage": 1,
+          "raw_total": 1,
+          "depth": 4,
+          "repeats": [
+            "🌸"
+          ],
+          "repeat_count": 1,
+          "methodMask": 1,
+          "repeatMask": 2,
+          "classKey": "1:1:1-4:2"
+        }
+      },
+      "m5": {
+        "main": null,
+        "picks": [],
+        "reserve": [],
+        "ranking": [],
+        "model": {
+          "seed": true
+        }
+      }
+    },
+    "19.08.26|18:17": {
+      "version": 3,
+      "key": "19.08.26|18:17",
+      "date": "19.08.26",
+      "weekday": "среда",
+      "time": "18:17",
+      "capturedAt": "2026-08-19T00:00:00Z",
+      "vChain": [],
+      "hChain": [],
+      "methods": {
+        "В→В": {
+          "usedLen": 4,
+          "usedChain": [
+            1,
+            6,
+            3,
+            6
+          ],
+          "counts": {
+            "1": 1,
+            "7": 1
+          }
+        },
+        "В→Г": {
+          "usedLen": 5,
+          "usedChain": [
+            10,
+            1,
+            6,
+            3,
+            6
+          ],
+          "counts": {
+            "4": 1
+          }
+        },
+        "Г→В": {
+          "usedLen": 4,
+          "usedChain": [
+            1,
+            7,
+            3,
+            8
+          ],
+          "counts": {
+            "8": 1,
+            "9": 1,
+            "6": 1
+          }
+        },
+        "Г→Г": {
+          "usedLen": 4,
+          "usedChain": [
+            1,
+            7,
+            3,
+            8
+          ],
+          "counts": {
+            "1": 1,
+            "10": 1
+          }
+        }
+      },
+      "repeats": [
+        {
+          "label": "🔵",
+          "value": 6
+        },
+        {
+          "label": "🌸",
+          "value": 3
+        },
+        {
+          "label": "🟢",
+          "value": 3
+        },
+        {
+          "label": "🟠",
+          "value": 1
+        },
+        {
+          "label": "💗",
+          "value": 8
+        },
+        {
+          "label": "🔴",
+          "value": 3
+        }
+      ],
+      "candidates": {
+        "1": {
+          "value": 1,
+          "methods": [
+            "В→В",
+            "Г→Г"
+          ],
+          "coverage": 2,
+          "raw_total": 2,
+          "depth": 8,
+          "repeats": [
+            "🟠"
+          ],
+          "repeat_count": 1,
+          "methodMask": 9,
+          "repeatMask": 8,
+          "classKey": "9:2:5-8:8"
+        },
+        "2": {
+          "value": 2,
+          "methods": [],
+          "coverage": 0,
+          "raw_total": 0,
+          "depth": 0,
+          "repeats": [],
+          "repeat_count": 0,
+          "methodMask": 0,
+          "repeatMask": 0,
+          "classKey": "0:0:0:0"
+        },
+        "3": {
+          "value": 3,
+          "methods": [],
+          "coverage": 0,
+          "raw_total": 0,
+          "depth": 0,
+          "repeats": [
+            "🌸",
+            "🟢",
+            "🔴"
+          ],
+          "repeat_count": 3,
+          "methodMask": 0,
+          "repeatMask": 38,
+          "classKey": "0:0:0:38"
+        },
+        "4": {
+          "value": 4,
+          "methods": [
+            "В→Г"
+          ],
+          "coverage": 1,
+          "raw_total": 1,
+          "depth": 5,
+          "repeats": [],
+          "repeat_count": 0,
+          "methodMask": 2,
+          "repeatMask": 0,
+          "classKey": "2:1:5-8:0"
+        },
+        "5": {
+          "value": 5,
+          "methods": [],
+          "coverage": 0,
+          "raw_total": 0,
+          "depth": 0,
+          "repeats": [],
+          "repeat_count": 0,
+          "methodMask": 0,
+          "repeatMask": 0,
+          "classKey": "0:0:0:0"
+        },
+        "6": {
+          "value": 6,
+          "methods": [
+            "Г→В"
+          ],
+          "coverage": 1,
+          "raw_total": 1,
+          "depth": 4,
+          "repeats": [
+            "🔵"
+          ],
+          "repeat_count": 1,
+          "methodMask": 4,
+          "repeatMask": 1,
+          "classKey": "4:1:1-4:1"
+        },
+        "7": {
+          "value": 7,
+          "methods": [
+            "В→В"
+          ],
+          "coverage": 1,
+          "raw_total": 1,
+          "depth": 4,
+          "repeats": [],
+          "repeat_count": 0,
+          "methodMask": 1,
+          "repeatMask": 0,
+          "classKey": "1:1:1-4:0"
+        },
+        "8": {
+          "value": 8,
+          "methods": [
+            "Г→В"
+          ],
+          "coverage": 1,
+          "raw_total": 1,
+          "depth": 4,
+          "repeats": [
+            "💗"
+          ],
+          "repeat_count": 1,
+          "methodMask": 4,
+          "repeatMask": 16,
+          "classKey": "4:1:1-4:16"
+        },
+        "9": {
+          "value": 9,
+          "methods": [
+            "Г→В"
+          ],
+          "coverage": 1,
+          "raw_total": 1,
+          "depth": 4,
+          "repeats": [],
+          "repeat_count": 0,
+          "methodMask": 4,
+          "repeatMask": 0,
+          "classKey": "4:1:1-4:0"
+        },
+        "10": {
+          "value": 10,
+          "methods": [
+            "Г→Г"
+          ],
+          "coverage": 1,
+          "raw_total": 1,
+          "depth": 4,
+          "repeats": [],
+          "repeat_count": 0,
+          "methodMask": 8,
+          "repeatMask": 0,
+          "classKey": "8:1:1-4:0"
+        }
+      },
+      "m5": {
+        "main": null,
+        "picks": [],
+        "reserve": [],
+        "ranking": [],
+        "model": {
+          "seed": true
+        }
+      }
+    },
+    "19.08.26|18:32": {
+      "version": 3,
+      "key": "19.08.26|18:32",
+      "date": "19.08.26",
+      "weekday": "среда",
+      "time": "18:32",
+      "capturedAt": "2026-08-19T00:00:00Z",
+      "vChain": [],
+      "hChain": [],
+      "methods": {
+        "В→В": {
+          "usedLen": 4,
+          "usedChain": [
+            3,
+            6,
+            6,
+            1
+          ],
+          "counts": {
+            "3": 1,
+            "9": 1
+          }
+        },
+        "В→Г": {
+          "usedLen": 5,
+          "usedChain": [
+            2,
+            3,
+            6,
+            6,
+            1
+          ],
+          "counts": {
+            "2": 1
+          }
+        },
+        "Г→В": {
+          "usedLen": 4,
+          "usedChain": [
+            7,
+            3,
+            8,
+            2
+          ],
+          "counts": {
+            "1": 1
+          }
+        },
+        "Г→Г": {
+          "usedLen": 4,
+          "usedChain": [
+            7,
+            3,
+            8,
+            2
+          ],
+          "counts": {
+            "5": 1,
+            "8": 1
+          }
+        }
+      },
+      "repeats": [
+        {
+          "label": "🔵",
+          "value": 1
+        },
+        {
+          "label": "🌸",
+          "value": 6
+        },
+        {
+          "label": "🟢",
+          "value": 6
+        },
+        {
+          "label": "🟠",
+          "value": 3
+        },
+        {
+          "label": "💗",
+          "value": 2
+        },
+        {
+          "label": "🔴",
+          "value": 8
+        }
+      ],
+      "candidates": {
+        "1": {
+          "value": 1,
+          "methods": [
+            "Г→В"
+          ],
+          "coverage": 1,
+          "raw_total": 1,
+          "depth": 4,
+          "repeats": [
+            "🔵"
+          ],
+          "repeat_count": 1,
+          "methodMask": 4,
+          "repeatMask": 1,
+          "classKey": "4:1:1-4:1"
+        },
+        "2": {
+          "value": 2,
+          "methods": [
+            "В→Г"
+          ],
+          "coverage": 1,
+          "raw_total": 1,
+          "depth": 5,
+          "repeats": [
+            "💗"
+          ],
+          "repeat_count": 1,
+          "methodMask": 2,
+          "repeatMask": 16,
+          "classKey": "2:1:5-8:16"
+        },
+        "3": {
+          "value": 3,
+          "methods": [
+            "В→В"
+          ],
+          "coverage": 1,
+          "raw_total": 1,
+          "depth": 4,
+          "repeats": [
+            "🟠"
+          ],
+          "repeat_count": 1,
+          "methodMask": 1,
+          "repeatMask": 8,
+          "classKey": "1:1:1-4:8"
+        },
+        "4": {
+          "value": 4,
+          "methods": [],
+          "coverage": 0,
+          "raw_total": 0,
+          "depth": 0,
+          "repeats": [],
+          "repeat_count": 0,
+          "methodMask": 0,
+          "repeatMask": 0,
+          "classKey": "0:0:0:0"
+        },
+        "5": {
+          "value": 5,
+          "methods": [
+            "Г→Г"
+          ],
+          "coverage": 1,
+          "raw_total": 1,
+          "depth": 4,
+          "repeats": [],
+          "repeat_count": 0,
+          "methodMask": 8,
+          "repeatMask": 0,
+          "classKey": "8:1:1-4:0"
+        },
+        "6": {
+          "value": 6,
+          "methods": [],
+          "coverage": 0,
+          "raw_total": 0,
+          "depth": 0,
+          "repeats": [
+            "🌸",
+            "🟢"
+          ],
+          "repeat_count": 2,
+          "methodMask": 0,
+          "repeatMask": 6,
+          "classKey": "0:0:0:6"
+        },
+        "7": {
+          "value": 7,
+          "methods": [],
+          "coverage": 0,
+          "raw_total": 0,
+          "depth": 0,
+          "repeats": [],
+          "repeat_count": 0,
+          "methodMask": 0,
+          "repeatMask": 0,
+          "classKey": "0:0:0:0"
+        },
+        "8": {
+          "value": 8,
+          "methods": [
+            "Г→Г"
+          ],
+          "coverage": 1,
+          "raw_total": 1,
+          "depth": 4,
+          "repeats": [
+            "🔴"
+          ],
+          "repeat_count": 1,
+          "methodMask": 8,
+          "repeatMask": 32,
+          "classKey": "8:1:1-4:32"
+        },
+        "9": {
+          "value": 9,
+          "methods": [
+            "В→В"
+          ],
+          "coverage": 1,
+          "raw_total": 1,
+          "depth": 4,
+          "repeats": [],
+          "repeat_count": 0,
+          "methodMask": 1,
+          "repeatMask": 0,
+          "classKey": "1:1:1-4:0"
+        },
+        "10": {
+          "value": 10,
+          "methods": [],
+          "coverage": 0,
+          "raw_total": 0,
+          "depth": 0,
+          "repeats": [],
+          "repeat_count": 0,
+          "methodMask": 0,
+          "repeatMask": 0,
+          "classKey": "0:0:0:0"
+        }
+      },
+      "m5": {
+        "main": null,
+        "picks": [],
+        "reserve": [],
+        "ranking": [],
+        "model": {
+          "seed": true
+        }
+      }
+    }
+  },
+  "finalized": {
+    "19.08.26|17:17": {
+      "key": "19.08.26|17:17",
+      "date": "19.08.26",
+      "weekday": "среда",
+      "time": "17:17",
+      "actual": 7,
+      "criterion": "В→Г + Г→В",
+      "coverage": 2,
+      "raw_total": 3,
+      "depth": 6,
+      "methods": [
+        "В→Г",
+        "Г→В"
+      ],
+      "repeats": [],
+      "repeat_count": 0,
+      "classKey": "6:3+:5-8:0",
+      "m5Main": null,
+      "m5Picks": [],
+      "hitMain": false,
+      "hitTop3": false,
+      "capturedAt": "2026-08-19T00:00:00Z",
+      "finalizedAt": "2026-08-19T00:00:01Z",
+      "snapshot": {
+        "version": 3,
+        "key": "19.08.26|17:17",
+        "date": "19.08.26",
+        "weekday": "среда",
+        "time": "17:17",
+        "capturedAt": "2026-08-19T00:00:00Z",
+        "vChain": [],
+        "hChain": [],
+        "methods": {
+          "В→В": {
+            "usedLen": 4,
+            "usedChain": [
+              5,
+              9,
+              2,
+              5
+            ],
+            "counts": {
+              "1": 2,
+              "5": 1,
+              "9": 1,
+              "10": 1
+            }
+          },
+          "В→Г": {
+            "usedLen": 3,
+            "usedChain": [
+              9,
+              2,
+              5
+            ],
+            "counts": {
+              "5": 5,
+              "4": 4,
+              "8": 4,
+              "1": 3,
+              "9": 3,
+              "2": 2,
+              "3": 2,
+              "10": 2,
+              "6": 1,
+              "7": 1
+            }
+          },
+          "Г→В": {
+            "usedLen": 3,
+            "usedChain": [
+              1,
+              3,
+              1
+            ],
+            "counts": {
+              "6": 6,
+              "2": 4,
+              "5": 4,
+              "8": 4,
+              "1": 3,
+              "4": 2,
+              "7": 2,
+              "9": 1,
+              "10": 1
+            }
+          },
+          "Г→Г": {
+            "usedLen": 4,
+            "usedChain": [
+              7,
+              1,
+              3,
+              1
+            ],
+            "counts": {
+              "1": 1,
+              "3": 1,
+              "6": 1,
+              "10": 1
+            }
+          }
+        },
+        "repeats": [
+          {
+            "label": "🔵",
+            "value": 5
+          },
+          {
+            "label": "🌸",
+            "value": 2
+          },
+          {
+            "label": "🟢",
+            "value": 3
+          },
+          {
+            "label": "🟠",
+            "value": 5
+          },
+          {
+            "label": "💗",
+            "value": 1
+          },
+          {
+            "label": "🔴",
+            "value": 3
+          }
+        ],
+        "candidates": {
+          "1": {
+            "value": 1,
+            "methods": [
+              "В→В",
+              "В→Г",
+              "Г→В",
+              "Г→Г"
+            ],
+            "coverage": 4,
+            "raw_total": 9,
+            "depth": 14,
+            "repeats": [
+              "💗"
+            ],
+            "repeat_count": 1,
+            "methodMask": 15,
+            "repeatMask": 16,
+            "classKey": "15:3+:9+:16"
+          },
+          "2": {
+            "value": 2,
+            "methods": [
+              "В→Г",
+              "Г→В"
+            ],
+            "coverage": 2,
+            "raw_total": 6,
+            "depth": 6,
+            "repeats": [
+              "🌸"
+            ],
+            "repeat_count": 1,
+            "methodMask": 6,
+            "repeatMask": 2,
+            "classKey": "6:3+:5-8:2"
+          },
+          "3": {
+            "value": 3,
+            "methods": [
+              "В→Г",
+              "Г→Г"
+            ],
+            "coverage": 2,
+            "raw_total": 3,
+            "depth": 7,
+            "repeats": [
+              "🟢",
+              "🔴"
+            ],
+            "repeat_count": 2,
+            "methodMask": 10,
+            "repeatMask": 36,
+            "classKey": "10:3+:5-8:36"
+          },
+          "4": {
+            "value": 4,
+            "methods": [
+              "В→Г",
+              "Г→В"
+            ],
+            "coverage": 2,
+            "raw_total": 6,
+            "depth": 6,
+            "repeats": [],
+            "repeat_count": 0,
+            "methodMask": 6,
+            "repeatMask": 0,
+            "classKey": "6:3+:5-8:0"
+          },
+          "5": {
+            "value": 5,
+            "methods": [
+              "В→В",
+              "В→Г",
+              "Г→В"
+            ],
+            "coverage": 3,
+            "raw_total": 10,
+            "depth": 10,
+            "repeats": [
+              "🔵",
+              "🟠"
+            ],
+            "repeat_count": 2,
+            "methodMask": 7,
+            "repeatMask": 9,
+            "classKey": "7:3+:9+:9"
+          },
+          "6": {
+            "value": 6,
+            "methods": [
+              "В→Г",
+              "Г→В",
+              "Г→Г"
+            ],
+            "coverage": 3,
+            "raw_total": 8,
+            "depth": 10,
+            "repeats": [],
+            "repeat_count": 0,
+            "methodMask": 14,
+            "repeatMask": 0,
+            "classKey": "14:3+:9+:0"
+          },
+          "7": {
+            "value": 7,
+            "methods": [
+              "В→Г",
+              "Г→В"
+            ],
+            "coverage": 2,
+            "raw_total": 3,
+            "depth": 6,
+            "repeats": [],
+            "repeat_count": 0,
+            "methodMask": 6,
+            "repeatMask": 0,
+            "classKey": "6:3+:5-8:0"
+          },
+          "8": {
+            "value": 8,
+            "methods": [
+              "В→Г",
+              "Г→В"
+            ],
+            "coverage": 2,
+            "raw_total": 8,
+            "depth": 6,
+            "repeats": [],
+            "repeat_count": 0,
+            "methodMask": 6,
+            "repeatMask": 0,
+            "classKey": "6:3+:5-8:0"
+          },
+          "9": {
+            "value": 9,
+            "methods": [
+              "В→В",
+              "В→Г",
+              "Г→В"
+            ],
+            "coverage": 3,
+            "raw_total": 5,
+            "depth": 10,
+            "repeats": [],
+            "repeat_count": 0,
+            "methodMask": 7,
+            "repeatMask": 0,
+            "classKey": "7:3+:9+:0"
+          },
+          "10": {
+            "value": 10,
+            "methods": [
+              "В→В",
+              "В→Г",
+              "Г→В",
+              "Г→Г"
+            ],
+            "coverage": 4,
+            "raw_total": 5,
+            "depth": 14,
+            "repeats": [],
+            "repeat_count": 0,
+            "methodMask": 15,
+            "repeatMask": 0,
+            "classKey": "15:3+:9+:0"
+          }
+        },
+        "m5": {
+          "main": null,
+          "picks": [],
+          "reserve": [],
+          "ranking": [],
+          "model": {
+            "seed": true
+          }
+        }
+      },
+      "source": "verified-seed"
+    },
+    "19.08.26|17:32": {
+      "key": "19.08.26|17:32",
+      "date": "19.08.26",
+      "weekday": "среда",
+      "time": "17:32",
+      "actual": 3,
+      "criterion": "В→В + Г→В + Г→Г + 🟠",
+      "coverage": 3,
+      "raw_total": 3,
+      "depth": 12,
+      "methods": [
+        "В→В",
+        "Г→В",
+        "Г→Г"
+      ],
+      "repeats": [
+        "🟠"
+      ],
+      "repeat_count": 1,
+      "classKey": "13:3+:9+:8",
+      "m5Main": null,
+      "m5Picks": [],
+      "hitMain": false,
+      "hitTop3": false,
+      "capturedAt": "2026-08-19T00:00:00Z",
+      "finalizedAt": "2026-08-19T00:00:01Z",
+      "snapshot": {
+        "version": 3,
+        "key": "19.08.26|17:32",
+        "date": "19.08.26",
+        "weekday": "среда",
+        "time": "17:32",
+        "capturedAt": "2026-08-19T00:00:00Z",
+        "vChain": [],
+        "hChain": [],
+        "methods": {
+          "В→В": {
+            "usedLen": 4,
+            "usedChain": [
+              9,
+              5,
+              4,
+              5
+            ],
+            "counts": {
+              "3": 1,
+              "6": 1,
+              "8": 1,
+              "2": 1
+            }
+          },
+          "В→Г": {
+            "usedLen": 5,
+            "usedChain": [
+              2,
+              9,
+              5,
+              4,
+              5
+            ],
+            "counts": {
+              "2": 1
+            }
+          },
+          "Г→В": {
+            "usedLen": 4,
+            "usedChain": [
+              1,
+              3,
+              1,
+              7
+            ],
+            "counts": {
+              "6": 1,
+              "3": 1
+            }
+          },
+          "Г→Г": {
+            "usedLen": 4,
+            "usedChain": [
+              1,
+              3,
+              1,
+              7
+            ],
+            "counts": {
+              "7": 2,
+              "8": 2,
+              "3": 1,
+              "4": 1,
+              "1": 1
+            }
+          }
+        },
+        "repeats": [
+          {
+            "label": "🔵",
+            "value": 5
+          },
+          {
+            "label": "🌸",
+            "value": 4
+          },
+          {
+            "label": "🟢",
+            "value": 5
+          },
+          {
+            "label": "🟠",
+            "value": 3
+          },
+          {
+            "label": "💗",
+            "value": 7
+          },
+          {
+            "label": "🔴",
+            "value": 1
+          }
+        ],
+        "candidates": {
+          "1": {
+            "value": 1,
+            "methods": [
+              "Г→Г"
+            ],
+            "coverage": 1,
+            "raw_total": 1,
+            "depth": 4,
+            "repeats": [
+              "🔴"
+            ],
+            "repeat_count": 1,
+            "methodMask": 8,
+            "repeatMask": 32,
+            "classKey": "8:1:1-4:32"
+          },
+          "2": {
+            "value": 2,
+            "methods": [
+              "В→В",
+              "В→Г"
+            ],
+            "coverage": 2,
+            "raw_total": 2,
+            "depth": 9,
+            "repeats": [],
+            "repeat_count": 0,
+            "methodMask": 3,
+            "repeatMask": 0,
+            "classKey": "3:2:9+:0"
+          },
+          "3": {
+            "value": 3,
+            "methods": [
+              "В→В",
+              "Г→В",
+              "Г→Г"
+            ],
+            "coverage": 3,
+            "raw_total": 3,
+            "depth": 12,
+            "repeats": [
+              "🟠"
+            ],
+            "repeat_count": 1,
+            "methodMask": 13,
+            "repeatMask": 8,
+            "classKey": "13:3+:9+:8"
+          },
+          "4": {
+            "value": 4,
+            "methods": [
+              "Г→Г"
+            ],
+            "coverage": 1,
+            "raw_total": 1,
+            "depth": 4,
+            "repeats": [
+              "🌸"
+            ],
+            "repeat_count": 1,
+            "methodMask": 8,
+            "repeatMask": 2,
+            "classKey": "8:1:1-4:2"
+          },
+          "5": {
+            "value": 5,
+            "methods": [],
+            "coverage": 0,
+            "raw_total": 0,
+            "depth": 0,
+            "repeats": [
+              "🔵",
+              "🟢"
+            ],
+            "repeat_count": 2,
+            "methodMask": 0,
+            "repeatMask": 5,
+            "classKey": "0:0:0:5"
+          },
+          "6": {
+            "value": 6,
+            "methods": [
+              "В→В",
+              "Г→В"
+            ],
+            "coverage": 2,
+            "raw_total": 2,
+            "depth": 8,
+            "repeats": [],
+            "repeat_count": 0,
+            "methodMask": 5,
+            "repeatMask": 0,
+            "classKey": "5:2:5-8:0"
+          },
+          "7": {
+            "value": 7,
+            "methods": [
+              "Г→Г"
+            ],
+            "coverage": 1,
+            "raw_total": 2,
+            "depth": 4,
+            "repeats": [
+              "💗"
+            ],
+            "repeat_count": 1,
+            "methodMask": 8,
+            "repeatMask": 16,
+            "classKey": "8:2:1-4:16"
+          },
+          "8": {
+            "value": 8,
+            "methods": [
+              "В→В",
+              "Г→Г"
+            ],
+            "coverage": 2,
+            "raw_total": 3,
+            "depth": 8,
+            "repeats": [],
+            "repeat_count": 0,
+            "methodMask": 9,
+            "repeatMask": 0,
+            "classKey": "9:3+:5-8:0"
+          },
+          "9": {
+            "value": 9,
+            "methods": [],
+            "coverage": 0,
+            "raw_total": 0,
+            "depth": 0,
+            "repeats": [],
+            "repeat_count": 0,
+            "methodMask": 0,
+            "repeatMask": 0,
+            "classKey": "0:0:0:0"
+          },
+          "10": {
+            "value": 10,
+            "methods": [],
+            "coverage": 0,
+            "raw_total": 0,
+            "depth": 0,
+            "repeats": [],
+            "repeat_count": 0,
+            "methodMask": 0,
+            "repeatMask": 0,
+            "classKey": "0:0:0:0"
+          }
+        },
+        "m5": {
+          "main": null,
+          "picks": [],
+          "reserve": [],
+          "ranking": [],
+          "model": {
+            "seed": true
+          }
+        }
+      },
+      "source": "verified-seed"
+    },
+    "19.08.26|18:02": {
+      "key": "19.08.26|18:02",
+      "date": "19.08.26",
+      "weekday": "среда",
+      "time": "18:02",
+      "actual": 8,
+      "criterion": "вне RAW + вне повторов",
+      "coverage": 0,
+      "raw_total": 0,
+      "depth": 0,
+      "methods": [],
+      "repeats": [],
+      "repeat_count": 0,
+      "classKey": "0:0:0:0",
+      "m5Main": null,
+      "m5Picks": [],
+      "hitMain": false,
+      "hitTop3": false,
+      "capturedAt": "2026-08-19T00:00:00Z",
+      "finalizedAt": "2026-08-19T00:00:01Z",
+      "snapshot": {
+        "version": 3,
+        "key": "19.08.26|18:02",
+        "date": "19.08.26",
+        "weekday": "среда",
+        "time": "18:02",
+        "capturedAt": "2026-08-19T00:00:00Z",
+        "vChain": [],
+        "hChain": [],
+        "methods": {
+          "В→В": {
+            "usedLen": 4,
+            "usedChain": [
+              2,
+              2,
+              10,
+              3
+            ],
+            "counts": {
+              "5": 1,
+              "10": 1
+            }
+          },
+          "В→Г": {
+            "usedLen": 4,
+            "usedChain": [
+              2,
+              2,
+              10,
+              3
+            ],
+            "counts": {
+              "7": 1,
+              "9": 1
+            }
+          },
+          "Г→В": {
+            "usedLen": 5,
+            "usedChain": [
+              1,
+              3,
+              1,
+              7,
+              3
+            ],
+            "counts": {
+              "5": 1
+            }
+          },
+          "Г→Г": {
+            "usedLen": 5,
+            "usedChain": [
+              1,
+              3,
+              1,
+              7,
+              3
+            ],
+            "counts": {
+              "6": 1
+            }
+          }
+        },
+        "repeats": [
+          {
+            "label": "🔵",
+            "value": 3
+          },
+          {
+            "label": "🌸",
+            "value": 10
+          },
+          {
+            "label": "🟢",
+            "value": 5
+          },
+          {
+            "label": "🟠",
+            "value": 6
+          },
+          {
+            "label": "💗",
+            "value": 3
+          },
+          {
+            "label": "🔴",
+            "value": 7
+          }
+        ],
+        "candidates": {
+          "1": {
+            "value": 1,
+            "methods": [],
+            "coverage": 0,
+            "raw_total": 0,
+            "depth": 0,
+            "repeats": [],
+            "repeat_count": 0,
+            "methodMask": 0,
+            "repeatMask": 0,
+            "classKey": "0:0:0:0"
+          },
+          "2": {
+            "value": 2,
+            "methods": [],
+            "coverage": 0,
+            "raw_total": 0,
+            "depth": 0,
+            "repeats": [],
+            "repeat_count": 0,
+            "methodMask": 0,
+            "repeatMask": 0,
+            "classKey": "0:0:0:0"
+          },
+          "3": {
+            "value": 3,
+            "methods": [],
+            "coverage": 0,
+            "raw_total": 0,
+            "depth": 0,
+            "repeats": [
+              "🔵",
+              "💗"
+            ],
+            "repeat_count": 2,
+            "methodMask": 0,
+            "repeatMask": 17,
+            "classKey": "0:0:0:17"
+          },
+          "4": {
+            "value": 4,
+            "methods": [],
+            "coverage": 0,
+            "raw_total": 0,
+            "depth": 0,
+            "repeats": [],
+            "repeat_count": 0,
+            "methodMask": 0,
+            "repeatMask": 0,
+            "classKey": "0:0:0:0"
+          },
+          "5": {
+            "value": 5,
+            "methods": [
+              "В→В",
+              "Г→В"
+            ],
+            "coverage": 2,
+            "raw_total": 2,
+            "depth": 9,
+            "repeats": [
+              "🟢"
+            ],
+            "repeat_count": 1,
+            "methodMask": 5,
+            "repeatMask": 4,
+            "classKey": "5:2:9+:4"
+          },
+          "6": {
+            "value": 6,
+            "methods": [
+              "Г→Г"
+            ],
+            "coverage": 1,
+            "raw_total": 1,
+            "depth": 5,
+            "repeats": [
+              "🟠"
+            ],
+            "repeat_count": 1,
+            "methodMask": 8,
+            "repeatMask": 8,
+            "classKey": "8:1:5-8:8"
+          },
+          "7": {
+            "value": 7,
+            "methods": [
+              "В→Г"
+            ],
+            "coverage": 1,
+            "raw_total": 1,
+            "depth": 4,
+            "repeats": [
+              "🔴"
+            ],
+            "repeat_count": 1,
+            "methodMask": 2,
+            "repeatMask": 32,
+            "classKey": "2:1:1-4:32"
+          },
+          "8": {
+            "value": 8,
+            "methods": [],
+            "coverage": 0,
+            "raw_total": 0,
+            "depth": 0,
+            "repeats": [],
+            "repeat_count": 0,
+            "methodMask": 0,
+            "repeatMask": 0,
+            "classKey": "0:0:0:0"
+          },
+          "9": {
+            "value": 9,
+            "methods": [
+              "В→Г"
+            ],
+            "coverage": 1,
+            "raw_total": 1,
+            "depth": 4,
+            "repeats": [],
+            "repeat_count": 0,
+            "methodMask": 2,
+            "repeatMask": 0,
+            "classKey": "2:1:1-4:0"
+          },
+          "10": {
+            "value": 10,
+            "methods": [
+              "В→В"
+            ],
+            "coverage": 1,
+            "raw_total": 1,
+            "depth": 4,
+            "repeats": [
+              "🌸"
+            ],
+            "repeat_count": 1,
+            "methodMask": 1,
+            "repeatMask": 2,
+            "classKey": "1:1:1-4:2"
+          }
+        },
+        "m5": {
+          "main": null,
+          "picks": [],
+          "reserve": [],
+          "ranking": [],
+          "model": {
+            "seed": true
+          }
+        }
+      },
+      "source": "verified-seed"
+    },
+    "19.08.26|18:17": {
+      "key": "19.08.26|18:17",
+      "date": "19.08.26",
+      "weekday": "среда",
+      "time": "18:17",
+      "actual": 2,
+      "criterion": "вне RAW + вне повторов",
+      "coverage": 0,
+      "raw_total": 0,
+      "depth": 0,
+      "methods": [],
+      "repeats": [],
+      "repeat_count": 0,
+      "classKey": "0:0:0:0",
+      "m5Main": null,
+      "m5Picks": [],
+      "hitMain": false,
+      "hitTop3": false,
+      "capturedAt": "2026-08-19T00:00:00Z",
+      "finalizedAt": "2026-08-19T00:00:01Z",
+      "snapshot": {
+        "version": 3,
+        "key": "19.08.26|18:17",
+        "date": "19.08.26",
+        "weekday": "среда",
+        "time": "18:17",
+        "capturedAt": "2026-08-19T00:00:00Z",
+        "vChain": [],
+        "hChain": [],
+        "methods": {
+          "В→В": {
+            "usedLen": 4,
+            "usedChain": [
+              1,
+              6,
+              3,
+              6
+            ],
+            "counts": {
+              "1": 1,
+              "7": 1
+            }
+          },
+          "В→Г": {
+            "usedLen": 5,
+            "usedChain": [
+              10,
+              1,
+              6,
+              3,
+              6
+            ],
+            "counts": {
+              "4": 1
+            }
+          },
+          "Г→В": {
+            "usedLen": 4,
+            "usedChain": [
+              1,
+              7,
+              3,
+              8
+            ],
+            "counts": {
+              "8": 1,
+              "9": 1,
+              "6": 1
+            }
+          },
+          "Г→Г": {
+            "usedLen": 4,
+            "usedChain": [
+              1,
+              7,
+              3,
+              8
+            ],
+            "counts": {
+              "1": 1,
+              "10": 1
+            }
+          }
+        },
+        "repeats": [
+          {
+            "label": "🔵",
+            "value": 6
+          },
+          {
+            "label": "🌸",
+            "value": 3
+          },
+          {
+            "label": "🟢",
+            "value": 3
+          },
+          {
+            "label": "🟠",
+            "value": 1
+          },
+          {
+            "label": "💗",
+            "value": 8
+          },
+          {
+            "label": "🔴",
+            "value": 3
+          }
+        ],
+        "candidates": {
+          "1": {
+            "value": 1,
+            "methods": [
+              "В→В",
+              "Г→Г"
+            ],
+            "coverage": 2,
+            "raw_total": 2,
+            "depth": 8,
+            "repeats": [
+              "🟠"
+            ],
+            "repeat_count": 1,
+            "methodMask": 9,
+            "repeatMask": 8,
+            "classKey": "9:2:5-8:8"
+          },
+          "2": {
+            "value": 2,
+            "methods": [],
+            "coverage": 0,
+            "raw_total": 0,
+            "depth": 0,
+            "repeats": [],
+            "repeat_count": 0,
+            "methodMask": 0,
+            "repeatMask": 0,
+            "classKey": "0:0:0:0"
+          },
+          "3": {
+            "value": 3,
+            "methods": [],
+            "coverage": 0,
+            "raw_total": 0,
+            "depth": 0,
+            "repeats": [
+              "🌸",
+              "🟢",
+              "🔴"
+            ],
+            "repeat_count": 3,
+            "methodMask": 0,
+            "repeatMask": 38,
+            "classKey": "0:0:0:38"
+          },
+          "4": {
+            "value": 4,
+            "methods": [
+              "В→Г"
+            ],
+            "coverage": 1,
+            "raw_total": 1,
+            "depth": 5,
+            "repeats": [],
+            "repeat_count": 0,
+            "methodMask": 2,
+            "repeatMask": 0,
+            "classKey": "2:1:5-8:0"
+          },
+          "5": {
+            "value": 5,
+            "methods": [],
+            "coverage": 0,
+            "raw_total": 0,
+            "depth": 0,
+            "repeats": [],
+            "repeat_count": 0,
+            "methodMask": 0,
+            "repeatMask": 0,
+            "classKey": "0:0:0:0"
+          },
+          "6": {
+            "value": 6,
+            "methods": [
+              "Г→В"
+            ],
+            "coverage": 1,
+            "raw_total": 1,
+            "depth": 4,
+            "repeats": [
+              "🔵"
+            ],
+            "repeat_count": 1,
+            "methodMask": 4,
+            "repeatMask": 1,
+            "classKey": "4:1:1-4:1"
+          },
+          "7": {
+            "value": 7,
+            "methods": [
+              "В→В"
+            ],
+            "coverage": 1,
+            "raw_total": 1,
+            "depth": 4,
+            "repeats": [],
+            "repeat_count": 0,
+            "methodMask": 1,
+            "repeatMask": 0,
+            "classKey": "1:1:1-4:0"
+          },
+          "8": {
+            "value": 8,
+            "methods": [
+              "Г→В"
+            ],
+            "coverage": 1,
+            "raw_total": 1,
+            "depth": 4,
+            "repeats": [
+              "💗"
+            ],
+            "repeat_count": 1,
+            "methodMask": 4,
+            "repeatMask": 16,
+            "classKey": "4:1:1-4:16"
+          },
+          "9": {
+            "value": 9,
+            "methods": [
+              "Г→В"
+            ],
+            "coverage": 1,
+            "raw_total": 1,
+            "depth": 4,
+            "repeats": [],
+            "repeat_count": 0,
+            "methodMask": 4,
+            "repeatMask": 0,
+            "classKey": "4:1:1-4:0"
+          },
+          "10": {
+            "value": 10,
+            "methods": [
+              "Г→Г"
+            ],
+            "coverage": 1,
+            "raw_total": 1,
+            "depth": 4,
+            "repeats": [],
+            "repeat_count": 0,
+            "methodMask": 8,
+            "repeatMask": 0,
+            "classKey": "8:1:1-4:0"
+          }
+        },
+        "m5": {
+          "main": null,
+          "picks": [],
+          "reserve": [],
+          "ranking": [],
+          "model": {
+            "seed": true
+          }
+        }
+      },
+      "source": "verified-seed"
+    },
+    "19.08.26|18:32": {
+      "key": "19.08.26|18:32",
+      "date": "19.08.26",
+      "weekday": "среда",
+      "time": "18:32",
+      "actual": 3,
+      "criterion": "В→В + 🟠",
+      "coverage": 1,
+      "raw_total": 1,
+      "depth": 4,
+      "methods": [
+        "В→В"
+      ],
+      "repeats": [
+        "🟠"
+      ],
+      "repeat_count": 1,
+      "classKey": "1:1:1-4:8",
+      "m5Main": null,
+      "m5Picks": [],
+      "hitMain": false,
+      "hitTop3": false,
+      "capturedAt": "2026-08-19T00:00:00Z",
+      "finalizedAt": "2026-08-19T00:00:01Z",
+      "snapshot": {
+        "version": 3,
+        "key": "19.08.26|18:32",
+        "date": "19.08.26",
+        "weekday": "среда",
+        "time": "18:32",
+        "capturedAt": "2026-08-19T00:00:00Z",
+        "vChain": [],
+        "hChain": [],
+        "methods": {
+          "В→В": {
+            "usedLen": 4,
+            "usedChain": [
+              3,
+              6,
+              6,
+              1
+            ],
+            "counts": {
+              "3": 1,
+              "9": 1
+            }
+          },
+          "В→Г": {
+            "usedLen": 5,
+            "usedChain": [
+              2,
+              3,
+              6,
+              6,
+              1
+            ],
+            "counts": {
+              "2": 1
+            }
+          },
+          "Г→В": {
+            "usedLen": 4,
+            "usedChain": [
+              7,
+              3,
+              8,
+              2
+            ],
+            "counts": {
+              "1": 1
+            }
+          },
+          "Г→Г": {
+            "usedLen": 4,
+            "usedChain": [
+              7,
+              3,
+              8,
+              2
+            ],
+            "counts": {
+              "5": 1,
+              "8": 1
+            }
+          }
+        },
+        "repeats": [
+          {
+            "label": "🔵",
+            "value": 1
+          },
+          {
+            "label": "🌸",
+            "value": 6
+          },
+          {
+            "label": "🟢",
+            "value": 6
+          },
+          {
+            "label": "🟠",
+            "value": 3
+          },
+          {
+            "label": "💗",
+            "value": 2
+          },
+          {
+            "label": "🔴",
+            "value": 8
+          }
+        ],
+        "candidates": {
+          "1": {
+            "value": 1,
+            "methods": [
+              "Г→В"
+            ],
+            "coverage": 1,
+            "raw_total": 1,
+            "depth": 4,
+            "repeats": [
+              "🔵"
+            ],
+            "repeat_count": 1,
+            "methodMask": 4,
+            "repeatMask": 1,
+            "classKey": "4:1:1-4:1"
+          },
+          "2": {
+            "value": 2,
+            "methods": [
+              "В→Г"
+            ],
+            "coverage": 1,
+            "raw_total": 1,
+            "depth": 5,
+            "repeats": [
+              "💗"
+            ],
+            "repeat_count": 1,
+            "methodMask": 2,
+            "repeatMask": 16,
+            "classKey": "2:1:5-8:16"
+          },
+          "3": {
+            "value": 3,
+            "methods": [
+              "В→В"
+            ],
+            "coverage": 1,
+            "raw_total": 1,
+            "depth": 4,
+            "repeats": [
+              "🟠"
+            ],
+            "repeat_count": 1,
+            "methodMask": 1,
+            "repeatMask": 8,
+            "classKey": "1:1:1-4:8"
+          },
+          "4": {
+            "value": 4,
+            "methods": [],
+            "coverage": 0,
+            "raw_total": 0,
+            "depth": 0,
+            "repeats": [],
+            "repeat_count": 0,
+            "methodMask": 0,
+            "repeatMask": 0,
+            "classKey": "0:0:0:0"
+          },
+          "5": {
+            "value": 5,
+            "methods": [
+              "Г→Г"
+            ],
+            "coverage": 1,
+            "raw_total": 1,
+            "depth": 4,
+            "repeats": [],
+            "repeat_count": 0,
+            "methodMask": 8,
+            "repeatMask": 0,
+            "classKey": "8:1:1-4:0"
+          },
+          "6": {
+            "value": 6,
+            "methods": [],
+            "coverage": 0,
+            "raw_total": 0,
+            "depth": 0,
+            "repeats": [
+              "🌸",
+              "🟢"
+            ],
+            "repeat_count": 2,
+            "methodMask": 0,
+            "repeatMask": 6,
+            "classKey": "0:0:0:6"
+          },
+          "7": {
+            "value": 7,
+            "methods": [],
+            "coverage": 0,
+            "raw_total": 0,
+            "depth": 0,
+            "repeats": [],
+            "repeat_count": 0,
+            "methodMask": 0,
+            "repeatMask": 0,
+            "classKey": "0:0:0:0"
+          },
+          "8": {
+            "value": 8,
+            "methods": [
+              "Г→Г"
+            ],
+            "coverage": 1,
+            "raw_total": 1,
+            "depth": 4,
+            "repeats": [
+              "🔴"
+            ],
+            "repeat_count": 1,
+            "methodMask": 8,
+            "repeatMask": 32,
+            "classKey": "8:1:1-4:32"
+          },
+          "9": {
+            "value": 9,
+            "methods": [
+              "В→В"
+            ],
+            "coverage": 1,
+            "raw_total": 1,
+            "depth": 4,
+            "repeats": [],
+            "repeat_count": 0,
+            "methodMask": 1,
+            "repeatMask": 0,
+            "classKey": "1:1:1-4:0"
+          },
+          "10": {
+            "value": 10,
+            "methods": [],
+            "coverage": 0,
+            "raw_total": 0,
+            "depth": 0,
+            "repeats": [],
+            "repeat_count": 0,
+            "methodMask": 0,
+            "repeatMask": 0,
+            "classKey": "0:0:0:0"
+          }
+        },
+        "m5": {
+          "main": null,
+          "picks": [],
+          "reserve": [],
+          "ranking": [],
+          "model": {
+            "seed": true
+          }
+        }
+      },
+      "source": "verified-seed"
+    }
+  }
+}
