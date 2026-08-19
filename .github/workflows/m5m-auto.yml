@@ -6,37 +6,88 @@ permissions:
 concurrency:
   group: m5m-stoloto-auto
   cancel-in-progress: false
+
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: main
+
       - name: Fresh main
         run: |
           git fetch origin main
           git reset --hard origin/main
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
       - name: Cache Chromium
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-1.54.0-chromium
+
       - name: Dependencies
         run: |
           python -m pip install --disable-pip-version-check --no-input "playwright==1.54.0" "openpyxl==3.1.5"
           python -m playwright install --with-deps chromium
-      - name: Read Stoloto and update M5M
+
+      - name: Read Stoloto until latest due draw is caught
         env:
           STOLOTO_EMAIL: ${{ secrets.STOLOTO_EMAIL }}
           STOLOTO_PASSWORD: ${{ secrets.STOLOTO_PASSWORD }}
-        run: python scripts/m5m_stoloto_sync.py
-      - name: Commit data
+        run: |
+          set -e
+          for attempt in 1 2 3 4 5 6; do
+            echo "M5M Stoloto attempt $attempt/6"
+            python scripts/m5m_stoloto_sync.py
+
+            # Проверяем: последний официальный результат уже дошёл
+            # до последнего АКТИВНОГО времени, которое к этой минуте должно быть завершено.
+            if python - <<'PY'
+          import json, sys
+          from datetime import datetime, timezone, timedelta
+          S=[
+          '00:02','00:17','00:32','01:02','01:17','01:32','02:02','02:17','02:32','03:02','03:32',
+          '04:02','04:17','04:32','05:02','05:17','05:32','06:02','06:17','06:32','07:02','07:32',
+          '08:02','08:17','08:32','09:02','09:17','09:32','10:02','10:17','10:32','11:02','11:32',
+          '12:02','12:17','12:32','13:02','13:17','13:32','14:02','14:17','14:32','15:02','15:32',
+          '16:02','16:17','16:32','17:02','17:17','17:32','18:02','18:17','18:32','19:02','19:32',
+          '20:02','20:17','20:32','21:02','21:17','21:32','22:02','22:17','22:32','23:02','23:32']
+          now=datetime.now(timezone.utc)+timedelta(hours=3)
+          hm=now.strftime('%H:%M')
+          due=[t for t in S if t<=hm]
+          if due:
+              due_date=now.strftime('%d.%m.%y'); due_time=due[-1]
+          else:
+              y=now-timedelta(days=1); due_date=y.strftime('%d.%m.%y'); due_time=S[-1]
+          x=json.load(open('data/last_sync.json',encoding='utf-8')).get('latestOfficial') or {}
+          def key(ds,tm):
+              d=datetime.strptime(ds,'%d.%m.%y')
+              return (d.toordinal(), S.index(tm) if tm in S else -1)
+          ok=False
+          try: ok=key(str(x.get('date')),str(x.get('time')))>=key(due_date,due_time)
+          except Exception: ok=False
+          print('due=',due_date,due_time,'latest=',x.get('date'),x.get('time'),'caught=',ok)
+          sys.exit(0 if ok else 1)
+          PY
+            then
+              echo "M5M is caught up."
+              break
+            fi
+
+            if [ "$attempt" -lt 6 ]; then
+              echo "Fresh draw not published yet; retry in 25 sec."
+              sleep 25
+            fi
+          done
+
+      - name: Commit data immediately
         run: |
           if git diff --quiet -- data/archive.json data/m5m_stolby_po_date_vremeni.xlsx data/last_sync.json; then
             echo "No changes"
