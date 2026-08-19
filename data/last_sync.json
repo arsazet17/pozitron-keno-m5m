@@ -1,51 +1,14 @@
 {
-  "updatedAt": "2026-08-19T18:57:16Z",
+  "updatedAt": "2026-08-19T19:07:57Z",
   "source": "Stoloto OAuth M5M tail10 triple-check",
   "stableDraws": 10,
-  "confirmedExisting": 4,
-  "added": 6,
+  "confirmedExisting": 10,
+  "added": 0,
   "latestOfficial": {
     "draw": 325840,
     "date": "19.08.26",
     "time": "21:32",
     "column": 5
   },
-  "addedRows": [
-    {
-      "draw": 325835,
-      "date": "19.08.26",
-      "time": "20:02",
-      "column": 10
-    },
-    {
-      "draw": 325836,
-      "date": "19.08.26",
-      "time": "20:17",
-      "column": 6
-    },
-    {
-      "draw": 325837,
-      "date": "19.08.26",
-      "time": "20:32",
-      "column": 3
-    },
-    {
-      "draw": 325838,
-      "date": "19.08.26",
-      "time": "21:02",
-      "column": 10
-    },
-    {
-      "draw": 325839,
-      "date": "19.08.26",
-      "time": "21:17",
-      "column": 10
-    },
-    {
-      "draw": 325840,
-      "date": "19.08.26",
-      "time": "21:32",
-      "column": 5
-    }
-  ]
+  "addedRows": []
 }
