@@ -1,0 +1,100 @@
+name: Restore old M5M splash
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/restore-m5m-old-splash.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  restore-splash:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore old startup splash only
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          index = Path("index.html")
+          style = Path("style.css")
+
+          html = index.read_text(encoding="utf-8")
+          css = style.read_text(encoding="utf-8")
+
+          splash_html = '<div id="m5mSplash" class="m5m-splash" aria-hidden="true"><img src="assets/m5m-splash.png" alt=""></div>'
+
+          splash_js = (
+              '<script id="m5m-old-splash-script">\n'
+              '(() => {\n'
+              '  const splash = document.getElementById("m5mSplash");\n'
+              '  if (!splash) return;\n'
+              '  window.setTimeout(() => splash.classList.add("m5m-splash-hide"), 1250);\n'
+              '  window.setTimeout(() => splash.remove(), 1900);\n'
+              '})();\n'
+              '</script>'
+          )
+
+          if 'id="m5mSplash"' not in html:
+              html = html.replace("<body>", "<body>\n" + splash_html, 1)
+
+          if 'id="m5m-old-splash-script"' not in html:
+              html = html.replace("</body>", splash_js + "\n</body>", 1)
+
+          splash_css = '''
+          /* RESTORED: original M5M startup splash */
+          .m5m-splash{
+            position:fixed;
+            inset:0;
+            z-index:99999;
+            background:#050b13;
+            display:flex;
+            align-items:stretch;
+            justify-content:center;
+            opacity:1;
+            transition:opacity .6s ease;
+            pointer-events:none;
+          }
+          .m5m-splash img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            object-position:center top;
+          }
+          .m5m-splash-hide{opacity:0}
+          '''
+
+          if "RESTORED: original M5M startup splash" not in css:
+              css += "\n" + splash_css + "\n"
+
+          index.write_text(html, encoding="utf-8")
+          style.write_text(css, encoding="utf-8")
+          PY
+
+      - name: Verify
+        shell: bash
+        run: |
+          test -f assets/m5m-splash.png
+          grep -q 'id="m5mSplash"' index.html
+          grep -q 'assets/m5m-splash.png' index.html
+          grep -q 'RESTORED: original M5M startup splash' style.css
+          echo "Old M5M splash restored."
+
+      - name: Commit
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html style.css
+          if git diff --cached --quiet; then
+            echo "Splash already restored."
+            exit 0
+          fi
+          git commit -m "Restore original M5M startup splash"
+          git push
