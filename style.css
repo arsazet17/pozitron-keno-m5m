@@ -101,3 +101,26 @@
   .history-draw,.history-date,.history-time,.history-column{font-size:10px}
   .history-fire{font-size:15px}
 }
+
+
+/* RESTORED: original M5M startup splash */
+.m5m-splash{
+  position:fixed;
+  inset:0;
+  z-index:99999;
+  background:#050b13;
+  display:flex;
+  align-items:stretch;
+  justify-content:center;
+  opacity:1;
+  transition:opacity .6s ease;
+  pointer-events:none;
+}
+.m5m-splash img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center top;
+}
+.m5m-splash-hide{opacity:0}
+
