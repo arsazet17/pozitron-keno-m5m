@@ -92,16 +92,20 @@
       const draw=officialDrawFor(r.date,r.time)??r.draw??null;
       const hit=!!r.hitTop3;
       const mainHit=!!r.hitMain;
-      const status=hit?'🔥':'—';
-      const resultText=mainHit?'🔥 ГЛАВНЫЙ':hit?'🔥 TOP-3':'мимо';
+      const reserve=(r.m5Reserve||[]);
+      const reserveHit=reserve.includes(Number(r.actual));
+      const won=hit||reserveHit;
+      const status=won?'🔥':'—';
+      const resultText=mainHit?'🔥 ГЛАВНЫЙ':hit?'🔥 TOP-3':reserveHit?'🔥 РЕЗЕРВ':'мимо';
       const top3=(r.m5Picks||[]).join(' · ')||'—';
-      return `<details class="history-item ${hit?'is-hit':'is-miss'}" data-key="${esc(r.key||`${r.date}|${r.time}`)}">
+      const reserveText=reserve.join(' · ')||'—';
+      return `<details class="history-item ${won?'is-hit':'is-miss'}" data-key="${esc(r.key||`${r.date}|${r.time}`)}">
         <summary>
           <span class="history-draw">${formatDrawNo(draw)}</span>
           <span class="history-date">${esc(r.date)}</span>
           <span class="history-time">${esc(r.time)}</span>
           <span class="history-column">ст${r.actual??'—'}</span>
-          <span class="history-fire" aria-label="${hit?'Выигрыш':'Мимо'}">${status}</span>
+          <span class="history-fire" aria-label="${won?'Выигрыш':'Мимо'}">${status}</span>
           <span class="history-chevron">▾</span>
         </summary>
         <div class="history-body">
@@ -111,7 +115,9 @@
           <div class="history-line"><span>Столб</span><b class="history-fact">${r.actual??'—'}</b></div>
           <div class="history-line"><span>Главный M5</span><b>${r.m5Main??'—'} ${mainHit?'<em class="history-win">✓</em>':''}</b></div>
           <div class="history-line"><span>TOP-3 M5</span><b class="history-top3">${esc(top3)}</b></div>
-          <div class="history-line"><span>Результат</span><b class="${hit?'history-win':'history-miss'}">${resultText}</b></div>
+          <div class="history-line"><span>Результат</span><b class="${won?'history-win':'history-miss'}">${resultText}</b></div>
+          <div class="history-line"><span>Резерв M5</span><b class="history-reserve">${esc(reserveText)}</b></div>
+          ${reserveHit?'<div class="history-line history-reserve-hit"><span>Резерв</span><b>🔥 ВЫШЕЛ ИЗ РЕЗЕРВА</b></div>':''}
           <div class="history-reason"><span>Почему вышел столб</span><b>${esc(r.criterion||'—')}</b></div>
         </div>
       </details>`;
@@ -142,7 +148,7 @@
   $('saveResult').addEventListener('click',async()=>{const d=$('resultDate').value.trim(),t=$('resultTime').value,v=E.val($('resultValue').value);if(!E.parseDate(d)||!E.SCHEDULE.includes(t)||v==null){toast('Проверь дату/время/столб');return;}const o=load(LS.overrides,{});o[`${d}|${t}`]=v;save(LS.overrides,o);$('resultValue').value='';await compute(baseMatrix,'manual-result');toast(`Факт ${d} ${t} = ${v}`);});
   $('clearLocal').addEventListener('click',async()=>{if(!confirm('Очистить локальные факты M5?'))return;localStorage.removeItem(LS.overrides);await compute(baseMatrix,'clear');toast('Локальные факты очищены');});
   $('exportXlsx').addEventListener('click',()=>{if(!window.XLSX)return;const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(matrix),'КЕНО столбы');XLSX.writeFile(wb,'M5M_current_archive.xlsx');});
-  $('exportAlgo').addEventListener('click',()=>{if(!window.XLSX)return;const st=S.load(),rows=[['Дата','День','Время','Факт','M5 главный','M5 TOP3','Попадание','Критерий','Coverage','Raw','Depth','Repeats']];Object.values(st.finalized).sort((a,b)=>E.parseDate(a.date)-E.parseDate(b.date)||E.SCHEDULE.indexOf(a.time)-E.SCHEDULE.indexOf(b.time)).forEach(r=>rows.push([r.date,r.weekday,r.time,r.actual,r.m5Main,(r.m5Picks||[]).join('-'),r.hitMain?'MAIN':r.hitTop3?'TOP3':'MISS',r.criterion,r.coverage,r.raw_total,r.depth,(r.repeats||[]).join('')]));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'M5 алгоритм');XLSX.writeFile(wb,'M5M_algorithm_matrix_v3.xlsx');});
+  $('exportAlgo').addEventListener('click',()=>{if(!window.XLSX)return;const st=S.load(),rows=[['Дата','День','Время','Факт','M5 главный','M5 TOP3','M5 резерв','Попадание','Критерий','Coverage','Raw','Depth','Repeats']];Object.values(st.finalized).sort((a,b)=>E.parseDate(a.date)-E.parseDate(b.date)||E.SCHEDULE.indexOf(a.time)-E.SCHEDULE.indexOf(b.time)).forEach(r=>rows.push([r.date,r.weekday,r.time,r.actual,r.m5Main,(r.m5Picks||[]).join('-'),(r.m5Reserve||[]).join('-'),r.hitMain?'MAIN':r.hitTop3?'TOP3':(r.m5Reserve||[]).includes(Number(r.actual))?'RESERVE':'MISS',r.criterion,r.coverage,r.raw_total,r.depth,(r.repeats||[]).join('')]));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'M5 алгоритм');XLSX.writeFile(wb,'M5M_algorithm_matrix_v3.xlsx');});
   $('importXlsx').addEventListener('change',async ev=>{const f=ev.target.files?.[0];if(!f||!window.XLSX)return;try{const wb=XLSX.read(await f.arrayBuffer(),{type:'array'}),ws=wb.Sheets[wb.SheetNames[0]],rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null});save(LS.custom,{rows});customActive=true;await compute(rows,'import');toast('Excel загружен');}catch(e){toast(e.message)}ev.target.value='';});
   $('useOfficial').addEventListener('click',async()=>{localStorage.removeItem(LS.custom);customActive=false;await refresh('official',true);});
   $('clearAlgo').addEventListener('click',async()=>{if(!confirm('Очистить накопленную матрицу M5 на этом устройстве?'))return;S.clear();await loadLearningSources();await compute(baseMatrix,'clear-algo');toast('Матрица очищена и серверная история восстановлена');});

@@ -1,4 +1,4 @@
-const CACHE='m5m-new-calc-v6';
+const CACHE='m5m-new-calc-v7';
 const ASSETS=['./','./index.html','./style.css','./m5-engine.js','./matrix-store.js','./app.js','./navigation.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./data/algorithm_seed_v3.json'];
 const DYNAMIC=['/data/archive.json','/data/m5-server-state.json','/data/m5-server-status.json','/data/last_sync.json'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));

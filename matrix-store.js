@@ -31,7 +31,7 @@
     return{
       version:3,key:String(s?.key||key(s?.date,s?.time)),date:String(s?.date||''),weekday:String(s?.weekday||''),
       time:String(s?.time||''),capturedAt:String(s?.capturedAt||new Date().toISOString()),candidates,
-      m5:{main:s?.m5?.main??null,picks:arr(s?.m5?.picks).slice()}
+      m5:{main:s?.m5?.main??null,picks:arr(s?.m5?.picks).slice(),reserve:arr(s?.m5?.reserve).slice()}
     };
   }
 
@@ -47,7 +47,7 @@
       key:String(r.key||key(r.date,r.time)),date:String(r.date||''),weekday:String(r.weekday||''),time:String(r.time||''),
       actual:num(r.actual,null),criterion:String(r.criterion||''),coverage:num(r.coverage),raw_total:num(r.raw_total),depth:num(r.depth),
       methods:arr(r.methods).slice(),repeats:arr(r.repeats).slice(),repeat_count:num(r.repeat_count),classKey:String(r.classKey||'0:0:0:0'),
-      m5Main:r.m5Main??null,m5Picks:arr(r.m5Picks).slice(),hitMain:!!r.hitMain,hitTop3:!!r.hitTop3,
+      m5Main:r.m5Main??null,m5Picks:arr(r.m5Picks).slice(),m5Reserve:arr(r.m5Reserve).slice(),hitMain:!!r.hitMain,hitTop3:!!r.hitTop3,
       capturedAt:String(r.capturedAt||''),finalizedAt:String(r.finalizedAt||''),snapshot:modelSnapshot(r.snapshot||{})
     };
   }
@@ -100,10 +100,10 @@
 
   function packState(src){
     const s=normalizeState(src),p=[],f=[];
-    for(const x of Object.values(s.snapshots))p.push([x.key,x.date,x.weekday,x.time,x.capturedAt,packCandidates(x.candidates,true),x.m5?.main??null,arr(x.m5?.picks)]);
+    for(const x of Object.values(s.snapshots))p.push([x.key,x.date,x.weekday,x.time,x.capturedAt,packCandidates(x.candidates,true),x.m5?.main??null,arr(x.m5?.picks),arr(x.m5?.reserve)]);
     for(const r of Object.values(s.finalized))f.push([
       r.key,r.date,r.weekday,r.time,r.actual,r.criterion,r.coverage,r.raw_total,r.depth,r.methods,r.repeats,r.repeat_count,r.classKey,
-      r.m5Main,r.m5Picks,r.hitMain?1:0,r.hitTop3?1:0,r.capturedAt,r.finalizedAt,packCandidates(r.snapshot?.candidates,false)
+      r.m5Main,r.m5Picks,r.hitMain?1:0,r.hitTop3?1:0,r.capturedAt,r.finalizedAt,packCandidates(r.snapshot?.candidates,false),r.m5Reserve
     ]);
     return{version:DISK_VERSION,p,f};
   }
@@ -111,11 +111,11 @@
   function unpackState(d){
     const s=blank();
     for(const a of arr(d?.p)){
-      const x={version:3,key:String(a[0]||''),date:String(a[1]||''),weekday:String(a[2]||''),time:String(a[3]||''),capturedAt:String(a[4]||''),candidates:unpackCandidates(a[5],true),m5:{main:a[6]??null,picks:arr(a[7])}};
+      const x={version:3,key:String(a[0]||''),date:String(a[1]||''),weekday:String(a[2]||''),time:String(a[3]||''),capturedAt:String(a[4]||''),candidates:unpackCandidates(a[5],true),m5:{main:a[6]??null,picks:arr(a[7]),reserve:arr(a[8])}};
       if(x.key)s.snapshots[x.key]=x;
     }
     for(const a of arr(d?.f)){
-      const r={key:String(a[0]||''),date:String(a[1]||''),weekday:String(a[2]||''),time:String(a[3]||''),actual:num(a[4],null),criterion:String(a[5]||''),coverage:num(a[6]),raw_total:num(a[7]),depth:num(a[8]),methods:arr(a[9]),repeats:arr(a[10]),repeat_count:num(a[11]),classKey:String(a[12]||'0:0:0:0'),m5Main:a[13]??null,m5Picks:arr(a[14]),hitMain:!!a[15],hitTop3:!!a[16],capturedAt:String(a[17]||''),finalizedAt:String(a[18]||''),snapshot:{date:String(a[1]||''),weekday:String(a[2]||''),time:String(a[3]||''),candidates:unpackCandidates(a[19],false)}};
+      const r={key:String(a[0]||''),date:String(a[1]||''),weekday:String(a[2]||''),time:String(a[3]||''),actual:num(a[4],null),criterion:String(a[5]||''),coverage:num(a[6]),raw_total:num(a[7]),depth:num(a[8]),methods:arr(a[9]),repeats:arr(a[10]),repeat_count:num(a[11]),classKey:String(a[12]||'0:0:0:0'),m5Main:a[13]??null,m5Picks:arr(a[14]),m5Reserve:arr(a[20]),hitMain:!!a[15],hitTop3:!!a[16],capturedAt:String(a[17]||''),finalizedAt:String(a[18]||''),snapshot:{date:String(a[1]||''),weekday:String(a[2]||''),time:String(a[3]||''),candidates:unpackCandidates(a[19],false)}};
       if(r.key)s.finalized[r.key]=r;
     }
     return s;
@@ -162,12 +162,12 @@
 
   function snapshotFromForecast(f){
     const candidates={};for(const [n,c] of Object.entries(f.candidates||{}))candidates[n]=compactCandidate(c,true);
-    return{version:3,key:key(f.target.date,f.target.time),date:f.target.date,weekday:f.weekday,time:f.target.time,capturedAt:new Date().toISOString(),candidates,m5:{main:f.main,picks:arr(f.picks).slice()}};
+    return{version:3,key:key(f.target.date,f.target.time),date:f.target.date,weekday:f.weekday,time:f.target.time,capturedAt:new Date().toISOString(),candidates,m5:{main:f.main,picks:arr(f.picks).slice(),reserve:arr(f.reserve).slice()}};
   }
   function criterion(c){const a=[];if(c.methods?.length)a.push(c.methods.join(' + '));else a.push('вне RAW');if(c.repeats?.length)a.push(c.repeats.join(' + '));else if(!c.methods?.length)a.push('вне повторов');return a.join(' + ');}
   function finalize(snap,actual){
     const c=snap.candidates?.[actual]||{methods:[],coverage:0,raw_total:0,depth:0,repeats:[],repeat_count:0,methodMask:0,repeatMask:0,classKey:'0:0:0:0'};
-    return{key:snap.key,date:snap.date,weekday:snap.weekday,time:snap.time,actual,criterion:criterion(c),coverage:c.coverage,raw_total:c.raw_total,depth:c.depth,methods:arr(c.methods),repeats:arr(c.repeats),repeat_count:c.repeat_count,classKey:c.classKey,m5Main:snap.m5?.main??null,m5Picks:arr(snap.m5?.picks),hitMain:(snap.m5?.main===actual),hitTop3:arr(snap.m5?.picks).includes(actual),capturedAt:snap.capturedAt,finalizedAt:new Date().toISOString(),snapshot:modelSnapshot(snap)};
+    return{key:snap.key,date:snap.date,weekday:snap.weekday,time:snap.time,actual,criterion:criterion(c),coverage:c.coverage,raw_total:c.raw_total,depth:c.depth,methods:arr(c.methods),repeats:arr(c.repeats),repeat_count:c.repeat_count,classKey:c.classKey,m5Main:snap.m5?.main??null,m5Picks:arr(snap.m5?.picks),m5Reserve:arr(snap.m5?.reserve),hitMain:(snap.m5?.main===actual),hitTop3:arr(snap.m5?.picks).includes(actual),capturedAt:snap.capturedAt,finalizedAt:new Date().toISOString(),snapshot:modelSnapshot(snap)};
   }
   function reconcile(matrix){
     const s=load();let changed=false;
