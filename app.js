@@ -8,7 +8,7 @@
   function toast(x){const t=$('toast');if(!t)return;t.textContent=x;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);}
   function fp(rows){return JSON.stringify((rows||[]).slice(-2));}
   function countsText(c){return Object.entries(c||{}).sort((a,b)=>b[1]-a[1]||Number(a[0])-Number(b[0])).map(([v,n])=>n>1?`${v}×${n}`:v).join(' · ')||'—';}
-  function formatDrawNo(n){const v=Number(n);return Number.isFinite(v)?`№${v}`:'№—';}
+  function formatDrawNo(n){if(n==null||n===''||Number(n)<=0)return '№—';const v=Number(n);return Number.isFinite(v)?`№${v}`:'№—';}
 
   async function fetchOptionalJSON(name){
     try{const r=await fetch(`${name}?ts=${Date.now()}`,{cache:'no-store'});if(!r.ok)return null;return await r.json();}
@@ -39,17 +39,12 @@
 
   function officialFilledSequence(){
     if(!matrix)return [];
-    const latest=syncMeta?.latestOfficial;
-    const latestDate=latest?.date,latestTime=latest?.time;
-    const latestDateObj=E.parseDate(latestDate);
-    if(!latestDateObj||!latestTime)return [];
     const out=[],hm=E.headerMap(matrix);
     for(let r=1;r<matrix.length;r++){
-      const date=String(matrix[r]?.[0]||''),d=E.parseDate(date);
-      if(!d||d>latestDateObj)continue;
+      const date=String(matrix[r]?.[0]||'');
+      if(!E.parseDate(date))continue;
       for(const time of E.SCHEDULE){
         const c=hm[time];if(c==null)continue;
-        if(d.getTime()===latestDateObj.getTime()&&E.SCHEDULE.indexOf(time)>E.SCHEDULE.indexOf(latestTime))break;
         const actual=E.val(matrix[r]?.[c]);
         if(actual!=null)out.push({date,time,actual});
       }
@@ -58,12 +53,13 @@
   }
   function officialDrawFor(date,time){
     const latest=syncMeta?.latestOfficial,latestDraw=Number(latest?.draw);
-    if(!Number.isFinite(latestDraw))return null;
+    if(!latest||!Number.isFinite(latestDraw)||latestDraw<=0)return null;
     const seq=officialFilledSequence();if(!seq.length)return null;
     const li=seq.findIndex(x=>x.date===String(latest.date)&&x.time===String(latest.time));
     const ti=seq.findIndex(x=>x.date===String(date)&&x.time===String(time));
-    if(li<0||ti<0||ti>li)return null;
-    return latestDraw-(li-ti);
+    if(li<0||ti<0)return null;
+    const draw=latestDraw+(ti-li);
+    return Number.isFinite(draw)&&draw>0?draw:null;
   }
 
   function renderForecast(){
@@ -79,6 +75,15 @@
 
   function renderHistory(){
     const box=$('historyBody');if(!box)return;
+
+    // Сохраняем раскрытые пользователем тиражи.
+    // Автообновление каждые 15 секунд больше не сворачивает открытое окно.
+    const opened=new Set(
+      [...box.querySelectorAll('details.history-item[open]')]
+        .map(x=>x.dataset.key)
+        .filter(Boolean)
+    );
+
     const fin=Object.values(S.load().finalized)
       .sort((a,b)=>E.parseDate(b.date)-E.parseDate(a.date)||E.SCHEDULE.indexOf(b.time)-E.SCHEDULE.indexOf(a.time))
       .slice(0,150);
@@ -90,7 +95,7 @@
       const status=hit?'🔥':'—';
       const resultText=mainHit?'🔥 ГЛАВНЫЙ':hit?'🔥 TOP-3':'мимо';
       const top3=(r.m5Picks||[]).join(' · ')||'—';
-      return `<details class="history-item ${hit?'is-hit':'is-miss'}">
+      return `<details class="history-item ${hit?'is-hit':'is-miss'}" data-key="${esc(r.key||`${r.date}|${r.time}`)}">
         <summary>
           <span class="history-draw">${formatDrawNo(draw)}</span>
           <span class="history-date">${esc(r.date)}</span>
@@ -111,6 +116,12 @@
         </div>
       </details>`;
     }).join('')||'<div class="history-empty">Пока нет завершённых прогнозов M5.</div>';
+
+    // Возвращаем раскрытое состояние. Окно остаётся открытым,
+    // пока пользователь сам не нажмёт и не свернёт его.
+    for(const d of box.querySelectorAll('details.history-item')){
+      if(opened.has(d.dataset.key))d.open=true;
+    }
   }
 
   function renderMatrix(){
