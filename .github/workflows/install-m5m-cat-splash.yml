@@ -1,0 +1,88 @@
+name: Install exact old M5M cat splash
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "assets/m5m-splash-cat-original.png"
+      - ".github/workflows/install-m5m-cat-splash.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Switch M5M to exact old cat splash
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path("index.html")
+          s = p.read_text(encoding="utf-8")
+
+          # Подключаем уникальное имя файла — старый кэш уже не сможет подставить
+          # предыдущую синюю M5M RAW V2 заставку.
+          old1 = 'src="assets/m5m-splash.png"'
+          old2 = 'src="assets/m5m-splash-cat-original.png"'
+          new  = 'src="assets/m5m-splash-cat-original.png?v=cat-original-20260820"'
+
+          if old1 in s:
+              s = s.replace(old1, new)
+          elif old2 in s:
+              s = s.replace(old2, new)
+          elif 'id="m5mSplash"' in s:
+              import re
+              s = re.sub(
+                  r'(<div id="m5mSplash"[^>]*><img src=")[^"]+(")',
+                  r'\1assets/m5m-splash-cat-original.png?v=cat-original-20260820\2',
+                  s,
+                  count=1
+              )
+          else:
+              splash = '<div id="m5mSplash" class="m5m-splash" aria-hidden="true"><img src="assets/m5m-splash-cat-original.png?v=cat-original-20260820" alt=""></div>'
+              s = s.replace("<body>", "<body>\n" + splash, 1)
+
+          p.write_text(s, encoding="utf-8")
+          PY
+
+      - name: Force service-worker refresh
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("sw.js")
+          s = p.read_text(encoding="utf-8")
+          import re
+          s = re.sub(
+              r"const CACHE='[^']+';",
+              "const CACHE='m5m-cat-splash-20260820-v1';",
+              s,
+              count=1
+          )
+          p.write_text(s, encoding="utf-8")
+          PY
+
+      - name: Verify
+        shell: bash
+        run: |
+          test -f assets/m5m-splash-cat-original.png
+          grep -q 'm5m-splash-cat-original.png?v=cat-original-20260820' index.html
+          grep -q "m5m-cat-splash-20260820-v1" sw.js
+
+      - name: Commit changes
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html sw.js assets/m5m-splash-cat-original.png
+          if git diff --cached --quiet; then
+            echo "Already installed."
+            exit 0
+          fi
+          git commit -m "Restore exact original M5M cat splash"
+          git push
