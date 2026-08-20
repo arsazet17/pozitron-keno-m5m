@@ -2,12 +2,13 @@
   'use strict';
   const E=window.M5Engine,S=window.M5MatrixStore;
   const LS={overrides:'m5m.overrides.v3',custom:'m5m.customMatrix.v3'};
-  let baseMatrix=null,matrix=null,forecast=null,customActive=false,lastFP='';
+  let baseMatrix=null,matrix=null,forecast=null,customActive=false,lastFP='',syncMeta=null;
   const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   const load=(k,d)=>{try{const x=localStorage.getItem(k);return x==null?d:JSON.parse(x)}catch{return d}},save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
   function toast(x){const t=$('toast');if(!t)return;t.textContent=x;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);}
   function fp(rows){return JSON.stringify((rows||[]).slice(-2));}
   function countsText(c){return Object.entries(c||{}).sort((a,b)=>b[1]-a[1]||Number(a[0])-Number(b[0])).map(([v,n])=>n>1?`${v}×${n}`:v).join(' · ')||'—';}
+  function formatDrawNo(n){const v=Number(n);return Number.isFinite(v)?`№${v}`:'№—';}
 
   async function fetchOptionalJSON(name){
     try{const r=await fetch(`${name}?ts=${Date.now()}`,{cache:'no-store'});if(!r.ok)return null;return await r.json();}
@@ -32,8 +33,38 @@
     if(seed)S.mergeSeed(seed);
     const server=await fetchOptionalJSON('data/m5-server-state.json');
     if(server)mergeServerState(server);
+    syncMeta=await fetchOptionalJSON('data/last_sync.json');
   }
   async function fetchArchive(){if(customActive){const c=load(LS.custom,null);if(c?.rows)return c;}const r=await fetch(`data/archive.json?ts=${Date.now()}`,{cache:'no-store'});if(!r.ok)throw new Error(`HTTP ${r.status}`);return await r.json();}
+
+  function officialFilledSequence(){
+    if(!matrix)return [];
+    const latest=syncMeta?.latestOfficial;
+    const latestDate=latest?.date,latestTime=latest?.time;
+    const latestDateObj=E.parseDate(latestDate);
+    if(!latestDateObj||!latestTime)return [];
+    const out=[],hm=E.headerMap(matrix);
+    for(let r=1;r<matrix.length;r++){
+      const date=String(matrix[r]?.[0]||''),d=E.parseDate(date);
+      if(!d||d>latestDateObj)continue;
+      for(const time of E.SCHEDULE){
+        const c=hm[time];if(c==null)continue;
+        if(d.getTime()===latestDateObj.getTime()&&E.SCHEDULE.indexOf(time)>E.SCHEDULE.indexOf(latestTime))break;
+        const actual=E.val(matrix[r]?.[c]);
+        if(actual!=null)out.push({date,time,actual});
+      }
+    }
+    return out;
+  }
+  function officialDrawFor(date,time){
+    const latest=syncMeta?.latestOfficial,latestDraw=Number(latest?.draw);
+    if(!Number.isFinite(latestDraw))return null;
+    const seq=officialFilledSequence();if(!seq.length)return null;
+    const li=seq.findIndex(x=>x.date===String(latest.date)&&x.time===String(latest.time));
+    const ti=seq.findIndex(x=>x.date===String(date)&&x.time===String(time));
+    if(li<0||ti<0||ti>li)return null;
+    return latestDraw-(li-ti);
+  }
 
   function renderForecast(){
     if(!forecast)return;
@@ -44,10 +75,43 @@
     $('vChain').textContent=forecast.vChain.join('–');$('hChain').textContent=forecast.hChain.join('–');
     $('rawMethods').innerHTML=Object.entries(forecast.methods).map(([name,m])=>`<div class="method"><div><b>${name}</b><span>L${m.usedLen} · ${esc(m.usedChain.join('–'))}</span></div><strong>${esc(countsText(m.counts))}</strong></div>`).join('');
     $('repeatLine').innerHTML=forecast.repeats.map(r=>`<span class="repeat-chip">${r.label} ${r.value??'—'}</span>`).join('');
-    $('scoreTable').innerHTML=forecast.ranking.map((r,i)=>`<tr class="${i<3?'picked-row':''}"><td>${i+1}</td><td><b>${r.value}</b></td><td>${r.score.toFixed(1)}</td><td>${r.structureScore.toFixed(1)}</td><td>${r.historyScore.toFixed(1)}</td><td>${r.coverage}</td><td>${r.raw_total}</td><td>${r.depth}</td><td>${r.repeat_count}</td><td>${esc((r.methods||[]).join('+')||'—')}</td><td>${esc((r.repeats||[]).join('')||'—')}</td></tr>`).join('');
   }
 
-  function renderHistory(){const fin=Object.values(S.load().finalized).sort((a,b)=>E.parseDate(b.date)-E.parseDate(a.date)||E.SCHEDULE.indexOf(b.time)-E.SCHEDULE.indexOf(a.time));$('historyBody').innerHTML=fin.slice(0,150).map(r=>`<tr><td>${r.date}</td><td>${r.time}</td><td><b>${r.actual}</b></td><td>${r.m5Main??'—'}</td><td>${(r.m5Picks||[]).join('·')||'—'}</td><td>${r.hitMain?'✅ главный':r.hitTop3?'☑️ TOP-3':'❌'}</td><td>${esc(r.criterion||'—')}</td></tr>`).join('');}
+  function renderHistory(){
+    const box=$('historyBody');if(!box)return;
+    const fin=Object.values(S.load().finalized)
+      .sort((a,b)=>E.parseDate(b.date)-E.parseDate(a.date)||E.SCHEDULE.indexOf(b.time)-E.SCHEDULE.indexOf(a.time))
+      .slice(0,150);
+
+    box.innerHTML=fin.map(r=>{
+      const draw=officialDrawFor(r.date,r.time)??r.draw??null;
+      const hit=!!r.hitTop3;
+      const mainHit=!!r.hitMain;
+      const status=hit?'🔥':'—';
+      const resultText=mainHit?'🔥 ГЛАВНЫЙ':hit?'🔥 TOP-3':'мимо';
+      const top3=(r.m5Picks||[]).join(' · ')||'—';
+      return `<details class="history-item ${hit?'is-hit':'is-miss'}">
+        <summary>
+          <span class="history-draw">${formatDrawNo(draw)}</span>
+          <span class="history-date">${esc(r.date)}</span>
+          <span class="history-time">${esc(r.time)}</span>
+          <span class="history-column">ст${r.actual??'—'}</span>
+          <span class="history-fire" aria-label="${hit?'Выигрыш':'Мимо'}">${status}</span>
+          <span class="history-chevron">▾</span>
+        </summary>
+        <div class="history-body">
+          <div class="history-line"><span>Тираж</span><b>${formatDrawNo(draw)}</b></div>
+          <div class="history-line"><span>Дата</span><b>${esc(r.date)}</b></div>
+          <div class="history-line"><span>Время</span><b>${esc(r.time)}</b></div>
+          <div class="history-line"><span>Столб</span><b class="history-fact">${r.actual??'—'}</b></div>
+          <div class="history-line"><span>Главный M5</span><b>${r.m5Main??'—'} ${mainHit?'<em class="history-win">✓</em>':''}</b></div>
+          <div class="history-line"><span>TOP-3 M5</span><b class="history-top3">${esc(top3)}</b></div>
+          <div class="history-line"><span>Результат</span><b class="${hit?'history-win':'history-miss'}">${resultText}</b></div>
+          <div class="history-reason"><span>Почему вышел столб</span><b>${esc(r.criterion||'—')}</b></div>
+        </div>
+      </details>`;
+    }).join('')||'<div class="history-empty">Пока нет завершённых прогнозов M5.</div>';
+  }
 
   function renderMatrix(){
     const st=S.load(),fin=Object.values(st.finalized).sort((a,b)=>E.parseDate(a.date)-E.parseDate(b.date)||E.SCHEDULE.indexOf(a.time)-E.SCHEDULE.indexOf(b.time));
