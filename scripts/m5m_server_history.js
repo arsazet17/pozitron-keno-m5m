@@ -70,7 +70,7 @@ function finalizedFromPending(snap, actual){
     key:snap.key, date:snap.date, weekday:snap.weekday, time:snap.time, actual:Number(actual),
     criterion:criterion(c), coverage:nval(c.coverage), raw_total:nval(c.raw_total), depth:nval(c.depth),
     methods:arr(c.methods).slice(), repeats:arr(c.repeats).slice(), repeat_count:nval(c.repeat_count), classKey:String(c.classKey||'0:0:0:0'),
-    m5Main:snap.m5?.main??null, m5Picks:arr(snap.m5?.picks).slice(),
+    m5Main:snap.m5?.main??null, m5Picks:arr(snap.m5?.picks).slice(), m5Reserve:arr(snap.m5?.reserve).slice(),
     hitMain:(snap.m5?.main===Number(actual)), hitTop3:arr(snap.m5?.picks).includes(Number(actual)),
     capturedAt:String(snap.capturedAt||''), finalizedAt:new Date().toISOString(), snapshot:modelSnapshot(snap),
     source:'SERVER_PRE_DRAW'
@@ -82,7 +82,7 @@ function compactExistingFinalized(r){
     key:String(r.key||key(r.date,r.time)), date:String(r.date||''), weekday:String(r.weekday||''), time:String(r.time||''),
     actual:nval(r.actual,null), criterion:String(r.criterion||''), coverage:nval(r.coverage), raw_total:nval(r.raw_total), depth:nval(r.depth),
     methods:arr(r.methods).slice(), repeats:arr(r.repeats).slice(), repeat_count:nval(r.repeat_count), classKey:String(r.classKey||'0:0:0:0'),
-    m5Main:r.m5Main??null, m5Picks:arr(r.m5Picks).slice(), hitMain:!!r.hitMain, hitTop3:!!r.hitTop3,
+    m5Main:r.m5Main??null, m5Picks:arr(r.m5Picks).slice(), m5Reserve:arr(r.m5Reserve).slice(), hitMain:!!r.hitMain, hitTop3:!!r.hitTop3,
     capturedAt:String(r.capturedAt||''), finalizedAt:String(r.finalizedAt||''), snapshot:modelSnapshot(r.snapshot||{}), source:r.source||'SEED'
   };
 }
