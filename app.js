@@ -95,7 +95,7 @@
       const reserve=(r.m5Reserve||[]);
       const reserveHit=reserve.includes(Number(r.actual));
       const won=hit||reserveHit;
-      const status=won?'🔥':'—';
+      const status=reserveHit?'🔥🔥':hit?'🔥':'—';
       const resultText=mainHit?'🔥 ГЛАВНЫЙ':hit?'🔥 TOP-3':reserveHit?'🔥 РЕЗЕРВ':'мимо';
       const top3=(r.m5Picks||[]).join(' · ')||'—';
       const reserveText=reserve.join(' · ')||'—';
