@@ -90,8 +90,10 @@ jobs:
           done
 
       - name: Finalize old M5 forecast and capture next BEFORE draw
-        run: |
-          node scripts/m5m_server_history.js
+        run: node scripts/m5m_server_history.js
+
+      - name: Build ONE atomic runtime for all app screens
+        run: node scripts/m5m_build_runtime.js
 
       - name: Commit data immediately
         run: |
@@ -100,7 +102,8 @@ jobs:
             data/m5m_stolby_po_date_vremeni.xlsx \
             data/last_sync.json \
             data/m5-server-state.json \
-            data/m5-server-status.json)" ]; then
+            data/m5-server-status.json \
+            data/m5-runtime.json)" ]; then
             echo "No changes"
             exit 0
           fi
@@ -111,8 +114,9 @@ jobs:
             data/m5m_stolby_po_date_vremeni.xlsx \
             data/last_sync.json \
             data/m5-server-state.json \
-            data/m5-server-status.json
-          git commit -m "M5M · Stoloto + server M5 history"
+            data/m5-server-status.json \
+            data/m5-runtime.json
+          git commit -m "M5M · atomic Stoloto runtime"
           git fetch origin main
           git rebase origin/main
           git push origin HEAD:main
