@@ -1,0 +1,84 @@
+name: Force refresh M5M cat splash
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/force-refresh-m5m-cat-splash.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Force new splash and new PWA cache
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          index = Path("index.html")
+          sw = Path("sw.js")
+
+          html = index.read_text(encoding="utf-8")
+          s = sw.read_text(encoding="utf-8")
+
+          splash_url = "assets/m5m-splash-cat-original.png?v=cat-original-20260821-force2"
+
+          if 'id="m5mSplash"' in html:
+              html = re.sub(
+                  r'(<div id="m5mSplash"[^>]*><img src=")[^"]+(")',
+                  r'\1' + splash_url + r'\2',
+                  html,
+                  count=1
+              )
+          else:
+              splash = f'<div id="m5mSplash" class="m5m-splash" aria-hidden="true"><img src="{splash_url}" alt=""></div>'
+              html = html.replace("<body>", "<body>\n" + splash, 1)
+
+          html = re.sub(r'style\.css\?v=[^"]+', 'style.css?v=m5-cat-force2', html)
+          html = re.sub(r"sw\.js\?v=[^'\"]+", "sw.js?v=m5-cat-force2", html)
+          index.write_text(html, encoding="utf-8")
+
+          s = re.sub(
+              r"const CACHE='[^']+';",
+              "const CACHE='m5m-cat-splash-force-20260821-v2';",
+              s,
+              count=1
+          )
+
+          if "./assets/m5m-splash-cat-original.png" not in s:
+              s = s.replace(
+                  "const ASSETS=[",
+                  "const ASSETS=['./assets/m5m-splash-cat-original.png',",
+                  1
+              )
+
+          sw.write_text(s, encoding="utf-8")
+          PY
+
+      - name: Verify
+        shell: bash
+        run: |
+          test -f assets/m5m-splash-cat-original.png
+          grep -q 'cat-original-20260821-force2' index.html
+          grep -q "m5m-cat-splash-force-20260821-v2" sw.js
+          grep -q "./assets/m5m-splash-cat-original.png" sw.js
+
+      - name: Commit
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html sw.js
+          if git diff --cached --quiet; then
+            echo "Already refreshed."
+            exit 0
+          fi
+          git commit -m "Force refresh M5M cat splash cache"
+          git push
