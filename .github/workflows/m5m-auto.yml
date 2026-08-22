@@ -10,7 +10,7 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
@@ -46,12 +46,13 @@ jobs:
           STOLOTO_EMAIL: ${{ secrets.STOLOTO_EMAIL }}
           STOLOTO_PASSWORD: ${{ secrets.STOLOTO_PASSWORD }}
         run: |
-          set -e
+          set -u
+          success=0
           for attempt in 1 2 3 4 5 6; do
             echo "M5M Stoloto attempt $attempt/6"
-            python scripts/m5m_stoloto_sync.py
 
-            if python - <<'PY'
+            if python scripts/m5m_stoloto_sync.py; then
+              if python - <<'PY'
           import json, sys
           from datetime import datetime, timezone, timedelta
           S=[
@@ -72,22 +73,32 @@ jobs:
           def key(ds,tm):
               d=datetime.strptime(ds,'%d.%m.%y')
               return (d.toordinal(), S.index(tm) if tm in S else -1)
-          ok=False
-          try: ok=key(str(x.get('date')),str(x.get('time')))>=key(due_date,due_time)
-          except Exception: ok=False
+          try:
+              ok=key(str(x.get('date')),str(x.get('time')))>=key(due_date,due_time)
+          except Exception:
+              ok=False
           print('due=',due_date,due_time,'latest=',x.get('date'),x.get('time'),'caught=',ok)
           sys.exit(0 if ok else 1)
           PY
-            then
-              echo "M5M is caught up."
-              break
+              then
+                echo "M5M is caught up."
+                success=1
+                break
+              fi
+            else
+              echo "Reader failed; retry is allowed."
             fi
 
             if [ "$attempt" -lt 6 ]; then
-              echo "Fresh draw not published yet; retry in 25 sec."
+              echo "Retry in 25 sec..."
               sleep 25
             fi
           done
+
+          if [ "$success" -ne 1 ]; then
+            echo "::error::M5M could not catch the newest due draw after 6 attempts."
+            exit 1
+          fi
 
       - name: Finalize old M5 forecast and capture next BEFORE draw
         run: node scripts/m5m_server_history.js
@@ -97,25 +108,13 @@ jobs:
 
       - name: Commit data immediately
         run: |
-          if [ -z "$(git status --porcelain -- \
-            data/archive.json \
-            data/m5m_stolby_po_date_vremeni.xlsx \
-            data/last_sync.json \
-            data/m5-server-state.json \
-            data/m5-server-status.json \
-            data/m5-runtime.json)" ]; then
+          if [ -z "$(git status --porcelain --             data/archive.json             data/m5m_stolby_po_date_vremeni.xlsx             data/last_sync.json             data/m5-server-state.json             data/m5-server-status.json             data/m5-runtime.json)" ]; then
             echo "No changes"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add \
-            data/archive.json \
-            data/m5m_stolby_po_date_vremeni.xlsx \
-            data/last_sync.json \
-            data/m5-server-state.json \
-            data/m5-server-status.json \
-            data/m5-runtime.json
+          git add             data/archive.json             data/m5m_stolby_po_date_vremeni.xlsx             data/last_sync.json             data/m5-server-state.json             data/m5-server-status.json             data/m5-runtime.json
           git commit -m "M5M · atomic Stoloto runtime"
           git fetch origin main
           git rebase origin/main
