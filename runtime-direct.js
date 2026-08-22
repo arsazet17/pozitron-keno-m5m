@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  // M5M v1.2.5 — источник LIVE-данных не зависит от снимка GitHub Pages.
+  // M5M v1.2.6 — LIVE data directly from GitHub main, without CORS-preflight headers.
   const RAW_BASE = 'https://raw.githubusercontent.com/arsazet17/pozitron-keno-m5m/main/';
   const nativeFetch = window.fetch.bind(window);
 
@@ -13,15 +13,14 @@
     'data/last_sync.json'
   ]);
 
-  function sourceUrl(input) {
+  function liveRelativePath(input) {
     try {
       const raw = typeof input === 'string' ? input : input?.url;
       if (!raw) return null;
       const u = new URL(raw, location.href);
-
-      // Перехватываем только файлы data именно этого приложения.
       const marker = '/pozitron-keno-m5m/';
       let rel = '';
+
       const i = u.pathname.indexOf(marker);
       if (i >= 0) rel = u.pathname.slice(i + marker.length);
       else if (u.origin === location.origin && u.pathname.startsWith('/data/')) rel = u.pathname.slice(1);
@@ -33,50 +32,31 @@
     }
   }
 
-  function noCacheHeaders(input, init) {
-    const h = new Headers(
-      init?.headers ||
-      (typeof Request !== 'undefined' && input instanceof Request ? input.headers : undefined)
-    );
-    h.set('Cache-Control', 'no-cache');
-    h.set('Pragma', 'no-cache');
-    return h;
+  async function rawFetch(rel, init = {}) {
+    const u = new URL(rel, RAW_BASE);
+    u.searchParams.set('ts', String(Date.now()));
+
+    // IMPORTANT: no custom Cache-Control/Pragma request headers here.
+    // They cause a CORS preflight in mobile Chrome.
+    return nativeFetch(u.href, {
+      ...init,
+      method: 'GET',
+      cache: 'no-store',
+      mode: 'cors',
+      credentials: 'omit',
+      headers: undefined
+    });
   }
 
   window.fetch = async function(input, init = {}) {
-    const rel = sourceUrl(input);
+    const rel = liveRelativePath(input);
     if (!rel) return nativeFetch(input, init);
 
-    const raw = new URL(rel, RAW_BASE);
-    raw.searchParams.set('ts', String(Date.now()));
-
-    const opts = {
-      ...init,
-      cache: 'no-store',
-      headers: noCacheHeaders(input, init)
-    };
-
-    try {
-      const r = await nativeFetch(raw.href, opts);
-      if (!r.ok) throw new Error(`RAW HTTP ${r.status}`);
-      return r;
-    } catch (err) {
-      // Для главного runtime НЕЛЬЗЯ возвращать старый снимок Pages.
-      // Лучше показать "нет свежего снимка", чем старый день/старый прогноз.
-      if (rel === 'data/m5-runtime.json') throw err;
-
-      // Для вспомогательных файлов допускаем резервный запрос Pages без кэша.
-      const original = new URL(
-        typeof input === 'string' ? input : input.url,
-        location.href
-      );
-      original.searchParams.set('ts', String(Date.now()));
-      return nativeFetch(original.href, opts);
-    }
+    const r = await rawFetch(rel, init);
+    if (!r.ok) throw new Error(`M5 LIVE RAW HTTP ${r.status}`);
+    return r;
   };
 
-  // Отдельная защита перехода суток по Москве.
-  // При смене даты сразу принудительно просим приложение перечитать LIVE runtime.
   function moscowDateKey() {
     try {
       const parts = new Intl.DateTimeFormat('en-CA', {
@@ -94,27 +74,28 @@
 
   let dayKey = moscowDateKey();
 
-  function forceLiveRefresh(reason) {
-    if (window.M5App?.refresh) {
-      window.M5App.refresh(reason, true).catch?.(() => {});
-    }
+  function refresh(reason, show = false) {
+    try {
+      const p = window.M5App?.refresh?.(reason, show);
+      if (p && typeof p.catch === 'function') p.catch(() => {});
+    } catch {}
   }
 
+  // Midnight guard + foreground guard.
   setInterval(() => {
     const next = moscowDateKey();
     if (next !== dayKey) {
       dayKey = next;
-      forceLiveRefresh('day-rollover');
+      refresh('day-rollover-live', true);
     }
   }, 30_000);
 
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) {
-      const next = moscowDateKey();
-      if (next !== dayKey) dayKey = next;
-      forceLiveRefresh('visible-direct-live');
+      dayKey = moscowDateKey();
+      refresh('visible-live', false);
     }
   });
 
-  window.addEventListener('online', () => forceLiveRefresh('online-direct-live'));
+  window.addEventListener('online', () => refresh('online-live', true));
 })();
