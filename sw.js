@@ -1,5 +1,18 @@
-const CACHE='m5m-runtime-direct-v5-20260822';
-const ASSETS=['./assets/m5m-splash-cat-original.png','./','./index.html','./style.css','./m5-engine.js','./matrix-store.js','./app.js','./navigation.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'];
+const CACHE='m5m-runtime-direct-v7-20260822';
+const ASSETS=[
+  './assets/m5m-splash-cat-original.png',
+  './',
+  './index.html',
+  './style.css',
+  './m5-engine.js',
+  './matrix-store.js',
+  './runtime-direct.js',
+  './app.js',
+  './navigation.js',
+  './manifest.webmanifest',
+  './icons/icon-192.png',
+  './icons/icon-512.png'
+];
 
 const RAW_BASE='https://raw.githubusercontent.com/arsazet17/pozitron-keno-m5m/main/';
 const DIRECT={
@@ -29,18 +42,25 @@ self.addEventListener('fetch',e=>{
   if(direct){
     const rawUrl=direct[1]+'?ts='+Date.now();
     e.respondWith(
-      fetch(rawUrl,{cache:'no-store',mode:'cors',headers:{'Cache-Control':'no-cache'}})
-        .then(r=>{
-          if(!r.ok)throw new Error('RAW HTTP '+r.status);
-          return r;
-        })
-        .catch(()=>fetch(new Request(e.request,{cache:'no-store'})))
+      fetch(rawUrl,{
+        cache:'no-store',
+        mode:'cors',
+        headers:{'Cache-Control':'no-cache','Pragma':'no-cache'}
+      }).then(r=>{
+        if(!r.ok)throw new Error('RAW HTTP '+r.status);
+        return r;
+      }).catch(err=>{
+        // Главный runtime никогда не подменяем старым кэшем/Pages.
+        if(u.pathname.endsWith('/data/m5-runtime.json')) throw err;
+        return fetch(new Request(e.request,{cache:'no-store'}));
+      })
     );
     return;
   }
 
+  // Статика: network-first. Старый кэш только как офлайн-резерв.
   e.respondWith(
-    fetch(e.request)
+    fetch(new Request(e.request,{cache:'no-store'}))
       .then(r=>{
         const x=r.clone();
         caches.open(CACHE).then(c=>c.put(e.request,x)).catch(()=>{});
