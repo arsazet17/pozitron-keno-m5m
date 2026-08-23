@@ -1,14 +1,21 @@
 {
-  "updatedAt": "2026-08-23T06:16:48Z",
+  "updatedAt": "2026-08-23T06:24:59Z",
   "source": "Stoloto OAuth M5M tail10 triple-check + fallback parser",
   "stableDraws": 10,
-  "confirmedExisting": 10,
-  "added": 0,
+  "confirmedExisting": 9,
+  "added": 1,
   "latestOfficial": {
-    "draw": 326069,
+    "draw": 326070,
     "date": "23.08.26",
-    "time": "09:02",
-    "column": 8
+    "time": "09:17",
+    "column": 4
   },
-  "addedRows": []
+  "addedRows": [
+    {
+      "draw": 326070,
+      "date": "23.08.26",
+      "time": "09:17",
+      "column": 4
+    }
+  ]
 }
