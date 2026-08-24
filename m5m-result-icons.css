@@ -1,0 +1,21 @@
+/* Optional styles for M5M result icons / labels */
+.result-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+.result-badge--top3 {
+  color: #ffb347;
+}
+.result-badge--reserve {
+  color: #ff9b3d;
+}
+.result-badge--miss {
+  color: #ff4d4f;
+}
+.result-badge--miss .icon,
+.history-miss {
+  color: #ff4d4f;
+}
