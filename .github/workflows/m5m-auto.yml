@@ -22,6 +22,43 @@ jobs:
           git fetch origin main
           git reset --hard origin/main
 
+      - name: Freeze target draw for this run
+        env:
+          M5M_PUBLICATION_GRACE_MINUTES: "7"
+        run: |
+          python3 - <<'PY'
+          import os
+          from datetime import datetime, timezone, timedelta
+
+          S=[
+          '00:02','00:17','00:32','01:02','01:17','01:32','02:02','02:17','02:32','03:02','03:32',
+          '04:02','04:17','04:32','05:02','05:17','05:32','06:02','06:17','06:32','07:02','07:32',
+          '08:02','08:17','08:32','09:02','09:17','09:32','10:02','10:17','10:32','11:02','11:32',
+          '12:02','12:17','12:32','13:02','13:17','13:32','14:02','14:17','14:32','15:02','15:32',
+          '16:02','16:17','16:32','17:02','17:17','17:32','18:02','18:17','18:32','19:02','19:32',
+          '20:02','20:17','20:32','21:02','21:17','21:32','22:02','22:17','22:32','23:02','23:32']
+          grace=int(os.environ['M5M_PUBLICATION_GRACE_MINUTES'])
+          now=datetime.now(timezone.utc)+timedelta(hours=3)
+          cutoff=now-timedelta(minutes=grace)
+          due=[t for t in S if t<=cutoff.strftime('%H:%M')]
+          if due:
+              due_date=cutoff.strftime('%d.%m.%y')
+              due_time=due[-1]
+          else:
+              previous=cutoff-timedelta(days=1)
+              due_date=previous.strftime('%d.%m.%y')
+              due_time=S[-1]
+
+          with open(os.environ['GITHUB_ENV'],'a',encoding='utf-8') as env_file:
+              env_file.write(f'M5M_DUE_DATE={due_date}\n')
+              env_file.write(f'M5M_DUE_TIME={due_time}\n')
+
+          print(
+              f'Frozen M5M target: {due_date} {due_time}; '
+              f'run start={now:%d.%m.%y %H:%M:%S} MSK; grace={grace}m'
+          )
+          PY
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -41,7 +78,7 @@ jobs:
           python -m pip install --disable-pip-version-check --no-input "playwright==1.54.0" "openpyxl==3.1.5"
           python -m playwright install --with-deps chromium
 
-      - name: Read Stoloto until latest due draw is caught
+      - name: Read Stoloto until frozen due draw is caught
         env:
           STOLOTO_EMAIL: ${{ secrets.STOLOTO_EMAIL }}
           STOLOTO_PASSWORD: ${{ secrets.STOLOTO_PASSWORD }}
@@ -53,8 +90,8 @@ jobs:
 
             if python scripts/m5m_stoloto_sync.py; then
               if python - <<'PY'
-          import json, sys
-          from datetime import datetime, timezone, timedelta
+          import json, os, sys
+          from datetime import datetime
           S=[
           '00:02','00:17','00:32','01:02','01:17','01:32','02:02','02:17','02:32','03:02','03:32',
           '04:02','04:17','04:32','05:02','05:17','05:32','06:02','06:17','06:32','07:02','07:32',
@@ -62,13 +99,8 @@ jobs:
           '12:02','12:17','12:32','13:02','13:17','13:32','14:02','14:17','14:32','15:02','15:32',
           '16:02','16:17','16:32','17:02','17:17','17:32','18:02','18:17','18:32','19:02','19:32',
           '20:02','20:17','20:32','21:02','21:17','21:32','22:02','22:17','22:32','23:02','23:32']
-          now=datetime.now(timezone.utc)+timedelta(hours=3)
-          hm=now.strftime('%H:%M')
-          due=[t for t in S if t<=hm]
-          if due:
-              due_date=now.strftime('%d.%m.%y'); due_time=due[-1]
-          else:
-              y=now-timedelta(days=1); due_date=y.strftime('%d.%m.%y'); due_time=S[-1]
+          due_date=os.environ['M5M_DUE_DATE']
+          due_time=os.environ['M5M_DUE_TIME']
           x=json.load(open('data/last_sync.json',encoding='utf-8')).get('latestOfficial') or {}
           def key(ds,tm):
               d=datetime.strptime(ds,'%d.%m.%y')
@@ -77,11 +109,11 @@ jobs:
               ok=key(str(x.get('date')),str(x.get('time')))>=key(due_date,due_time)
           except Exception:
               ok=False
-          print('due=',due_date,due_time,'latest=',x.get('date'),x.get('time'),'caught=',ok)
+          print('frozen_due=',due_date,due_time,'latest=',x.get('date'),x.get('time'),'caught=',ok)
           sys.exit(0 if ok else 1)
           PY
               then
-                echo "M5M is caught up."
+                echo "M5M is caught up to the frozen target."
                 success=1
                 break
               fi
@@ -96,9 +128,20 @@ jobs:
           done
 
           if [ "$success" -ne 1 ]; then
-            echo "::error::M5M could not catch the newest due draw after 6 attempts."
+            echo "::error::M5M could not catch the frozen due draw after 6 attempts."
             exit 1
           fi
+
+      - name: Upload OAuth diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m5m-oauth-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            data/m5m-oauth-debug.json
+            data/m5m-oauth-debug.png
+          if-no-files-found: ignore
+          retention-days: 3
 
       - name: Finalize old M5 forecast and capture next BEFORE draw
         run: node scripts/m5m_server_history.js
