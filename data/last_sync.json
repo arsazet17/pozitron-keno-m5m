@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-09-07T04:47:02Z",
-  "source": "Stoloto OAuth M5M tail10 triple-check + fallback parser",
+  "updatedAt": "2026-09-07T04:51:58Z",
+  "source": "Stoloto OAuth M5M tail 2-of-3 consensus + fallback parser",
   "stableDraws": 10,
   "confirmedExisting": 10,
   "added": 0,
