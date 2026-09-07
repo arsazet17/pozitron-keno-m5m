@@ -10,6 +10,9 @@ ARCHIVE_URL='https://m.stoloto.ru/keno2/archive/'
 ARCHIVE_JSON=Path('data/archive.json')
 ARCHIVE_XLSX=Path('data/m5m_stolby_po_date_vremeni.xlsx')
 LAST_SYNC=Path('data/last_sync.json')
+OAUTH_DIAG_JSON=Path('data/m5m-oauth-debug.json')
+OAUTH_DIAG_PNG=Path('data/m5m-oauth-debug.png')
+OAUTH_FORM_TIMEOUT_MS=15000
 TAIL_SIZE=10
 PAGE_READ_ATTEMPTS=3
 SCHEDULE=[
@@ -65,26 +68,101 @@ def valid_col(v):
     except Exception:return None
     return n if 1<=n<=10 else None
 
+async def first_visible(scope,selectors):
+    for sel in selectors:
+        loc=scope.locator(sel).first
+        try:
+            if await loc.count() and await loc.is_visible():
+                return loc
+        except Exception:
+            pass
+    return None
+
+async def wait_for_login_fields(page,timeout_ms=OAUTH_FORM_TIMEOUT_MS):
+    login_selectors=[
+        'input[type="email"]','input[name*="email" i]','input[name*="login" i]',
+        'input[autocomplete="username"]','input[type="text"]'
+    ]
+    password_selectors=[
+        'input[type="password"]','input[name*="password" i]',
+        'input[autocomplete="current-password"]'
+    ]
+    deadline=asyncio.get_running_loop().time()+timeout_ms/1000
+    while asyncio.get_running_loop().time()<deadline:
+        for frame in page.frames:
+            login_loc=await first_visible(frame,login_selectors)
+            pass_loc=await first_visible(frame,password_selectors)
+            if login_loc is not None and pass_loc is not None:
+                return frame,login_loc,pass_loc
+        await page.wait_for_timeout(250)
+    return None,None,None
+
+async def capture_oauth_diagnostics(page,reason):
+    captured={
+        'capturedAt':datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),
+        'reason':reason,
+        'url':page.url,
+        'frames':[]
+    }
+    try:
+        captured['title']=await page.title()
+    except Exception as e:
+        captured['titleError']=str(e)
+
+    for frame in page.frames:
+        frame_diag={'url':frame.url,'inputs':[]}
+        try:
+            inputs=frame.locator('input')
+            count=min(await inputs.count(),30)
+            for i in range(count):
+                loc=inputs.nth(i)
+                try:
+                    meta=await loc.evaluate(r'''el => ({
+                      type: el.getAttribute('type'),
+                      name: el.getAttribute('name'),
+                      autocomplete: el.getAttribute('autocomplete'),
+                      placeholder: el.getAttribute('placeholder')
+                    })''')
+                    meta['visible']=await loc.is_visible()
+                    frame_diag['inputs'].append(meta)
+                except Exception as e:
+                    frame_diag['inputs'].append({'inspectionError':str(e)})
+        except Exception as e:
+            frame_diag['inspectionError']=str(e)
+        captured['frames'].append(frame_diag)
+
+    try:
+        OAUTH_DIAG_JSON.parent.mkdir(parents=True,exist_ok=True)
+        OAUTH_DIAG_JSON.write_text(
+            json.dumps(captured,ensure_ascii=False,indent=2)+'\n',
+            encoding='utf-8'
+        )
+    except Exception as e:
+        print(f'WARN: could not write OAuth JSON diagnostics: {e}',file=sys.stderr)
+
+    try:
+        await page.screenshot(path=str(OAUTH_DIAG_PNG),full_page=True)
+    except Exception as e:
+        print(f'WARN: could not write OAuth screenshot: {e}',file=sys.stderr)
+
 async def login(page,email,password):
     await page.goto(LOGIN_URL,wait_until='domcontentloaded',timeout=60000)
-    login_loc=None; pass_loc=None
-    for sel in ['input[type="email"]','input[name*="email" i]','input[name*="login" i]',
-                'input[autocomplete="username"]','input[type="text"]']:
-        loc=page.locator(sel).first
-        if await loc.count(): login_loc=loc; break
-    for sel in ['input[type="password"]','input[name*="password" i]',
-                'input[autocomplete="current-password"]']:
-        loc=page.locator(sel).first
-        if await loc.count(): pass_loc=loc; break
+    scope,login_loc,pass_loc=await wait_for_login_fields(page)
     if login_loc is None or pass_loc is None:
-        raise RuntimeError(f'OAuth fields not found; url={page.url}')
+        reason=f'OAuth fields not visible within {OAUTH_FORM_TIMEOUT_MS//1000}s'
+        await capture_oauth_diagnostics(page,reason)
+        raise RuntimeError(f'{reason}; url={page.url}')
+
     await login_loc.fill(email); await pass_loc.fill(password)
     clicked=False
-    for btn in [page.get_by_role('button',name=re.compile('войти',re.I)).first,
-                page.locator('button[type="submit"]').first,
-                page.locator('input[type="submit"]').first]:
-        if await btn.count():
-            await btn.click(); clicked=True; break
+    for btn in [scope.get_by_role('button',name=re.compile('войти',re.I)).first,
+                scope.locator('button[type="submit"]').first,
+                scope.locator('input[type="submit"]').first]:
+        try:
+            if await btn.count() and await btn.is_visible():
+                await btn.click(); clicked=True; break
+        except Exception:
+            pass
     if not clicked: raise RuntimeError('OAuth submit button not found')
     try: await page.wait_for_load_state('domcontentloaded',timeout=20000)
     except Exception: pass
@@ -210,28 +288,79 @@ async def collect(page):
         + json.dumps(last_diag,ensure_ascii=False)
     )
 
+def stable_record_key(record):
+    return (str(record.get('date')),str(record.get('time')),valid_col(record.get('column')))
+
+def contiguous_runs(records):
+    ordered=sorted(records,key=lambda x:int(x['draw']))
+    runs=[]
+    for record in ordered:
+        if not runs or int(record['draw'])!=int(runs[-1][-1]['draw'])+1:
+            runs.append([record])
+        else:
+            runs[-1].append(record)
+    return runs
+
+def choose_stable_consensus(reads,tail_size=TAIL_SIZE):
+    if len(reads)<2:
+        raise RuntimeError('At least two tail reads are required')
+
+    maps=[{int(r['draw']):r for r in read} for read in reads]
+    minimum=max(2,tail_size-1)
+    candidates=[]; pair_diagnostics=[]
+
+    for left in range(len(maps)-1):
+        for right in range(left+1,len(maps)):
+            agreed=[]
+            for draw in sorted(set(maps[left])&set(maps[right])):
+                a=maps[left][draw]; b=maps[right][draw]
+                if stable_record_key(a)==stable_record_key(b):
+                    agreed.append(a)
+
+            runs=contiguous_runs(agreed)
+            spans=[]
+            for run in runs:
+                spans.append(f"{run[0]['draw']}-{run[-1]['draw']}({len(run)})")
+                if len(run)>=minimum:
+                    tail=run[-tail_size:]
+                    candidates.append({
+                        'left':left+1,
+                        'right':right+1,
+                        'records':tail,
+                        'lastDraw':int(tail[-1]['draw']),
+                        'length':len(tail)
+                    })
+            pair_diagnostics.append(
+                f"checks {left+1}+{right+1}: {','.join(spans) if spans else 'none'}"
+            )
+
+    if not candidates:
+        raise RuntimeError(
+            f'No {minimum}-draw contiguous 2-of-{len(reads)} consensus; '
+            + '; '.join(pair_diagnostics)
+        )
+
+    chosen=max(candidates,key=lambda x:(x['lastDraw'],x['length']))
+    diagnostics={
+        'checks':[chosen['left'],chosen['right']],
+        'stableDraws':chosen['length'],
+        'firstDraw':int(chosen['records'][0]['draw']),
+        'lastDraw':chosen['lastDraw']
+    }
+    return chosen['records'],diagnostics
+
 async def stable_tail(page):
     reads=[]
     for check in range(1,4):
         x=await collect(page)
         if len(x)<TAIL_SIZE:
             raise RuntimeError(f'Only {len(x)} recent draws found')
-        reads.append({r['draw']:r for r in x})
+        reads.append(x)
         if check<3:
             await page.wait_for_timeout(900)
 
-    common=sorted(set(reads[0])&set(reads[1])&set(reads[2]))[-TAIL_SIZE:]
-    if len(common)<TAIL_SIZE:
-        raise RuntimeError('Tail changed between checks')
-
-    stable=[]
-    for draw in common:
-        a,b,c=reads[0][draw],reads[1][draw],reads[2][draw]
-        if (a['date'],a['time'],a['column'])==(b['date'],b['time'],b['column'])==(c['date'],c['time'],c['column']):
-            stable.append(a)
-
-    if len(stable)<TAIL_SIZE:
-        raise RuntimeError('Triple check failed')
+    stable,diagnostics=choose_stable_consensus(reads)
+    print('Stable tail consensus: '+json.dumps(diagnostics,ensure_ascii=False))
     return stable
 
 def header_map(rows):
@@ -333,7 +462,7 @@ async def main():
     LAST_SYNC.write_text(
         json.dumps({
             'updatedAt':datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),
-            'source':'Stoloto OAuth M5M tail10 triple-check + fallback parser',
+            'source':'Stoloto OAuth M5M tail 2-of-3 consensus + fallback parser',
             'stableDraws':len(stable),
             'confirmedExisting':confirmed,
             'added':len(added),
