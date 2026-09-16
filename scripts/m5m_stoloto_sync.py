@@ -79,403 +79,195 @@ async def first_visible(scope,selectors):
     return None
 
 async def wait_for_login_fields(page,timeout_ms=OAUTH_FORM_TIMEOUT_MS):
-    login_selectors=[
-        'input[type="email"]','input[name*="email" i]','input[name*="login" i]',
-        'input[autocomplete="username"]','input[type="text"]'
-    ]
-    password_selectors=[
-        'input[type="password"]','input[name*="password" i]',
-        'input[autocomplete="current-password"]'
-    ]
+    login_selectors=['input[type="email"]','input[name*="email" i]','input[name*="login" i]','input[autocomplete="username"]','input[type="text"]']
+    password_selectors=['input[type="password"]','input[name*="password" i]','input[autocomplete="current-password"]']
     deadline=asyncio.get_running_loop().time()+timeout_ms/1000
     while asyncio.get_running_loop().time()<deadline:
         for frame in page.frames:
-            login_loc=await first_visible(frame,login_selectors)
-            pass_loc=await first_visible(frame,password_selectors)
-            if login_loc is not None and pass_loc is not None:
-                return frame,login_loc,pass_loc
+            login_loc=await first_visible(frame,login_selectors); pass_loc=await first_visible(frame,password_selectors)
+            if login_loc is not None and pass_loc is not None:return frame,login_loc,pass_loc
         await page.wait_for_timeout(250)
     return None,None,None
 
 async def capture_oauth_diagnostics(page,reason):
-    captured={
-        'capturedAt':datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),
-        'reason':reason,
-        'url':page.url,
-        'frames':[]
-    }
-    try:
-        captured['title']=await page.title()
-    except Exception as e:
-        captured['titleError']=str(e)
-
+    captured={'capturedAt':datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),'reason':reason,'url':page.url,'frames':[]}
+    try:captured['title']=await page.title()
+    except Exception as e:captured['titleError']=str(e)
     for frame in page.frames:
         frame_diag={'url':frame.url,'inputs':[]}
         try:
-            inputs=frame.locator('input')
-            count=min(await inputs.count(),30)
+            inputs=frame.locator('input'); count=min(await inputs.count(),30)
             for i in range(count):
                 loc=inputs.nth(i)
                 try:
-                    meta=await loc.evaluate(r'''el => ({
-                      type: el.getAttribute('type'),
-                      name: el.getAttribute('name'),
-                      autocomplete: el.getAttribute('autocomplete'),
-                      placeholder: el.getAttribute('placeholder')
-                    })''')
-                    meta['visible']=await loc.is_visible()
-                    frame_diag['inputs'].append(meta)
-                except Exception as e:
-                    frame_diag['inputs'].append({'inspectionError':str(e)})
-        except Exception as e:
-            frame_diag['inspectionError']=str(e)
+                    meta=await loc.evaluate(r'''el => ({type: el.getAttribute('type'),name: el.getAttribute('name'),autocomplete: el.getAttribute('autocomplete'),placeholder: el.getAttribute('placeholder')})''')
+                    meta['visible']=await loc.is_visible(); frame_diag['inputs'].append(meta)
+                except Exception as e:frame_diag['inputs'].append({'inspectionError':str(e)})
+        except Exception as e:frame_diag['inspectionError']=str(e)
         captured['frames'].append(frame_diag)
-
     try:
-        OAUTH_DIAG_JSON.parent.mkdir(parents=True,exist_ok=True)
-        OAUTH_DIAG_JSON.write_text(
-            json.dumps(captured,ensure_ascii=False,indent=2)+'\n',
-            encoding='utf-8'
-        )
-    except Exception as e:
-        print(f'WARN: could not write OAuth JSON diagnostics: {e}',file=sys.stderr)
-
-    try:
-        await page.screenshot(path=str(OAUTH_DIAG_PNG),full_page=True)
-    except Exception as e:
-        print(f'WARN: could not write OAuth screenshot: {e}',file=sys.stderr)
+        OAUTH_DIAG_JSON.parent.mkdir(parents=True,exist_ok=True); OAUTH_DIAG_JSON.write_text(json.dumps(captured,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    except Exception as e:print(f'WARN: could not write OAuth JSON diagnostics: {e}',file=sys.stderr)
+    try:await page.screenshot(path=str(OAUTH_DIAG_PNG),full_page=True)
+    except Exception as e:print(f'WARN: could not write OAuth screenshot: {e}',file=sys.stderr)
 
 async def login(page,email,password):
     await page.goto(LOGIN_URL,wait_until='domcontentloaded',timeout=60000)
     scope,login_loc,pass_loc=await wait_for_login_fields(page)
     if login_loc is None or pass_loc is None:
-        reason=f'OAuth fields not visible within {OAUTH_FORM_TIMEOUT_MS//1000}s'
-        await capture_oauth_diagnostics(page,reason)
-        raise RuntimeError(f'{reason}; url={page.url}')
-
-    await login_loc.fill(email); await pass_loc.fill(password)
-    clicked=False
-    for btn in [scope.get_by_role('button',name=re.compile('войти',re.I)).first,
-                scope.locator('button[type="submit"]').first,
-                scope.locator('input[type="submit"]').first]:
+        reason=f'OAuth fields not visible within {OAUTH_FORM_TIMEOUT_MS//1000}s'; await capture_oauth_diagnostics(page,reason); raise RuntimeError(f'{reason}; url={page.url}')
+    await login_loc.fill(email); await pass_loc.fill(password); clicked=False
+    for btn in [scope.get_by_role('button',name=re.compile('войти',re.I)).first,scope.locator('button[type="submit"]').first,scope.locator('input[type="submit"]').first]:
         try:
-            if await btn.count() and await btn.is_visible():
-                await btn.click(); clicked=True; break
-        except Exception:
-            pass
-    if not clicked: raise RuntimeError('OAuth submit button not found')
-    try: await page.wait_for_load_state('domcontentloaded',timeout=20000)
-    except Exception: pass
+            if await btn.count() and await btn.is_visible():await btn.click(); clicked=True; break
+        except Exception:pass
+    if not clicked:raise RuntimeError('OAuth submit button not found')
+    try:await page.wait_for_load_state('domcontentloaded',timeout=20000)
+    except Exception:pass
     await page.wait_for_timeout(3500)
 
 async def primary_dom_collect(page):
-    raw=await page.locator('body').evaluate(r'''() => {
-      const drawRx=/№\s*\d{4,}/;
-      const dateRx=/^(Сегодня|Вчера|\d{1,2}[.\/-]\d{1,2}[.\/-]\d{2,4}|\d{1,2}\s+(?:января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)(?:\s+\d{4})?)$/i;
-      const norm=s=>String(s||'').replace(/\u00a0/g,' ').replace(/[ \t]+/g,' ').trim();
-      const all=[...document.querySelectorAll('body *')];
-      function nearestDate(el){
-        let best=null;
-        for(const node of all){
-          if(node===el||el.contains(node))continue;
-          const pos=node.compareDocumentPosition(el);
-          if(!(pos&Node.DOCUMENT_POSITION_FOLLOWING))continue;
-          const t=norm(node.innerText||node.textContent||'');
-          if(!t||t.length>40||!dateRx.test(t))continue;
-          if(node.children&&node.children.length>3)continue;
-          best=t;
-        }
-        return best;
-      }
-      let rows=[...document.querySelectorAll('tr')].filter(el=>drawRx.test(el.innerText||''));
-      if(!rows.length)rows=all.filter(el=>{
-        const t=norm(el.innerText||'');
-        return drawRx.test(t)&&![...el.children].some(ch=>drawRx.test(norm(ch.innerText||'')));
-      });
-      return rows.map(el=>({text:el.innerText||'',dateLabel:nearestDate(el)}));
-    }''')
+    raw=await page.locator('body').evaluate(r'''() => {const drawRx=/№\s*\d{4,}/;const dateRx=/^(Сегодня|Вчера|\d{1,2}[.\/-]\d{1,2}[.\/-]\d{2,4}|\d{1,2}\s+(?:января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)(?:\s+\d{4})?)$/i;const norm=s=>String(s||'').replace(/\u00a0/g,' ').replace(/[ \t]+/g,' ').trim();const all=[...document.querySelectorAll('body *')];function nearestDate(el){let best=null;for(const node of all){if(node===el||el.contains(node))continue;const pos=node.compareDocumentPosition(el);if(!(pos&Node.DOCUMENT_POSITION_FOLLOWING))continue;const t=norm(node.innerText||node.textContent||'');if(!t||t.length>40||!dateRx.test(t))continue;if(node.children&&node.children.length>3)continue;best=t;}return best;}let rows=[...document.querySelectorAll('tr')].filter(el=>drawRx.test(el.innerText||''));if(!rows.length)rows=all.filter(el=>{const t=norm(el.innerText||'');return drawRx.test(t)&&![...el.children].some(ch=>drawRx.test(norm(ch.innerText||'')));});return rows.map(el=>({text:el.innerText||'',dateLabel:nearestDate(el)}));}''')
     out=[]; carry=None
     for row in raw:
         text=str(row.get('text','')); label=norm(row.get('dateLabel',''))
-        if label: carry=label
-        draw=parse_draw(text); tm=parse_time(text); col=parse_column(text)
-        ds=parse_date_label(label or carry) if (label or carry) else None
-        if draw and tm in SCHEDULE_SET and col and ds:
-            out.append({'draw':draw,'date':ds,'time':tm,'column':col})
-    uniq={x['draw']:x for x in out}
-    return sorted(uniq.values(),key=lambda x:x['draw'])
+        if label:carry=label
+        draw=parse_draw(text); tm=parse_time(text); col=parse_column(text); ds=parse_date_label(label or carry) if (label or carry) else None
+        if draw and tm in SCHEDULE_SET and col and ds:out.append({'draw':draw,'date':ds,'time':tm,'column':col})
+    uniq={x['draw']:x for x in out}; return sorted(uniq.values(),key=lambda x:x['draw'])
 
 def fallback_text_collect(body_text):
-    lines=[norm(x) for x in str(body_text or '').splitlines()]
-    lines=[x for x in lines if x]
-    date_rx=re.compile(
-        r'^(Сегодня|Вчера|\d{1,2}[./-]\d{1,2}[./-]\d{2,4}|'
-        r'\d{1,2}\s+(?:января|февраля|марта|апреля|мая|июня|июля|августа|'
-        r'сентября|октября|ноября|декабря)(?:\s+\d{4})?)$',re.I)
+    lines=[norm(x) for x in str(body_text or '').splitlines()]; lines=[x for x in lines if x]
+    date_rx=re.compile(r'^(Сегодня|Вчера|\d{1,2}[./-]\d{1,2}[./-]\d{2,4}|\d{1,2}\s+(?:января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)(?:\s+\d{4})?)$',re.I)
     out=[]; current_date=None
     for i,line in enumerate(lines):
-        if date_rx.fullmatch(line):
-            current_date=parse_date_label(line) or current_date
-        if not re.search(r'№\s*\d{4,}',line): continue
+        if date_rx.fullmatch(line):current_date=parse_date_label(line) or current_date
+        if not re.search(r'№\s*\d{4,}',line):continue
         if current_date is None:
             for j in range(max(0,i-5),i):
-                if date_rx.fullmatch(lines[j]):
-                    current_date=parse_date_label(lines[j]) or current_date
-        chunk=' '.join(lines[i:min(len(lines),i+8)])
-        draw=parse_draw(chunk); tm=parse_time(chunk); col=parse_column(chunk)
-        if draw and tm in SCHEDULE_SET and col and current_date:
-            out.append({'draw':draw,'date':current_date,'time':tm,'column':col})
-    uniq={x['draw']:x for x in out}
-    return sorted(uniq.values(),key=lambda x:x['draw'])
+                if date_rx.fullmatch(lines[j]):current_date=parse_date_label(lines[j]) or current_date
+        chunk=' '.join(lines[i:min(len(lines),i+8)]); draw=parse_draw(chunk); tm=parse_time(chunk); col=parse_column(chunk)
+        if draw and tm in SCHEDULE_SET and col and current_date:out.append({'draw':draw,'date':current_date,'time':tm,'column':col})
+    uniq={x['draw']:x for x in out}; return sorted(uniq.values(),key=lambda x:x['draw'])
 
 async def collect(page):
     last_diag=None
     for page_attempt in range(1,PAGE_READ_ATTEMPTS+1):
-        try:
-            await page.goto(ARCHIVE_URL,wait_until='domcontentloaded',timeout=60000)
-        except Exception as e:
-            print(f'WARN: archive goto attempt {page_attempt}: {e}',file=sys.stderr)
-
-        try:
-            await page.wait_for_load_state('networkidle',timeout=12000)
-        except Exception:
-            pass
+        try:await page.goto(ARCHIVE_URL,wait_until='domcontentloaded',timeout=60000)
+        except Exception as e:print(f'WARN: archive goto attempt {page_attempt}: {e}',file=sys.stderr)
+        try:await page.wait_for_load_state('networkidle',timeout=30000)
+        except Exception:pass
         await page.wait_for_timeout(2500 + 1000*page_attempt)
-
         primary=await primary_dom_collect(page)
-        try:
-            body=await page.locator('body').inner_text(timeout=10000)
-        except Exception:
-            body=''
-        fallback=fallback_text_collect(body)
-
-        merged={x['draw']:x for x in primary}
-        for x in fallback:
-            merged.setdefault(x['draw'],x)
+        try:body=await page.locator('body').inner_text(timeout=30000)
+        except Exception:body=''
+        fallback=fallback_text_collect(body); merged={x['draw']:x for x in primary}
+        for x in fallback:merged.setdefault(x['draw'],x)
         out=sorted(merged.values(),key=lambda x:x['draw'])
-
         try:title=await page.title()
         except Exception:title=''
-
-        last_diag={
-            'pageAttempt':page_attempt,
-            'url':page.url,
-            'title':title,
-            'primary':len(primary),
-            'fallback':len(fallback),
-            'merged':len(out),
-            'bodyHead':norm(body)[:700]
-        }
-
-        print(
-            f"Stoloto page attempt {page_attempt}/{PAGE_READ_ATTEMPTS}: "
-            f"url={page.url} primary={len(primary)} "
-            f"fallback={len(fallback)} merged={len(out)}"
-        )
-
-        if len(out)>=TAIL_SIZE:
-            return out[-TAIL_SIZE:]
-
-        try:
-            await page.reload(wait_until='domcontentloaded',timeout=60000)
-        except Exception:
-            pass
+        last_diag={'pageAttempt':page_attempt,'url':page.url,'title':title,'primary':len(primary),'fallback':len(fallback),'merged':len(out),'bodyHead':norm(body)[:700]}
+        print(f"Stoloto page attempt {page_attempt}/{PAGE_READ_ATTEMPTS}: url={page.url} primary={len(primary)} fallback={len(fallback)} merged={len(out)}")
+        if len(out)>=TAIL_SIZE:return out[-TAIL_SIZE:]
+        try:await page.reload(wait_until='domcontentloaded',timeout=60000)
+        except Exception:pass
         await page.wait_for_timeout(1800)
+    raise RuntimeError(f"Only {(last_diag or {}).get('merged',0)} recent draws found after {PAGE_READ_ATTEMPTS} page reads; diagnostics="+json.dumps(last_diag,ensure_ascii=False))
 
-    raise RuntimeError(
-        f"Only {(last_diag or {}).get('merged',0)} recent draws found after "
-        f"{PAGE_READ_ATTEMPTS} page reads; diagnostics="
-        + json.dumps(last_diag,ensure_ascii=False)
-    )
-
-def stable_record_key(record):
-    return (str(record.get('date')),str(record.get('time')),valid_col(record.get('column')))
-
+def stable_record_key(record):return (str(record.get('date')),str(record.get('time')),valid_col(record.get('column')))
 def contiguous_runs(records):
-    ordered=sorted(records,key=lambda x:int(x['draw']))
-    runs=[]
+    ordered=sorted(records,key=lambda x:int(x['draw'])); runs=[]
     for record in ordered:
-        if not runs or int(record['draw'])!=int(runs[-1][-1]['draw'])+1:
-            runs.append([record])
-        else:
-            runs[-1].append(record)
+        if not runs or int(record['draw'])!=int(runs[-1][-1]['draw'])+1:runs.append([record])
+        else:runs[-1].append(record)
     return runs
 
 def choose_stable_consensus(reads,tail_size=TAIL_SIZE):
-    if len(reads)<2:
-        raise RuntimeError('At least two tail reads are required')
-
-    maps=[{int(r['draw']):r for r in read} for read in reads]
-    minimum=max(2,tail_size-1)
-    candidates=[]; pair_diagnostics=[]
-
+    if len(reads)<2:raise RuntimeError('At least two tail reads are required')
+    maps=[{int(r['draw']):r for r in read} for read in reads]; minimum=max(2,tail_size-1); candidates=[]; pair_diagnostics=[]
     for left in range(len(maps)-1):
         for right in range(left+1,len(maps)):
             agreed=[]
             for draw in sorted(set(maps[left])&set(maps[right])):
                 a=maps[left][draw]; b=maps[right][draw]
-                if stable_record_key(a)==stable_record_key(b):
-                    agreed.append(a)
-
-            runs=contiguous_runs(agreed)
-            spans=[]
+                if stable_record_key(a)==stable_record_key(b):agreed.append(a)
+            runs=contiguous_runs(agreed); spans=[]
             for run in runs:
                 spans.append(f"{run[0]['draw']}-{run[-1]['draw']}({len(run)})")
                 if len(run)>=minimum:
-                    tail=run[-tail_size:]
-                    candidates.append({
-                        'left':left+1,
-                        'right':right+1,
-                        'records':tail,
-                        'lastDraw':int(tail[-1]['draw']),
-                        'length':len(tail)
-                    })
-            pair_diagnostics.append(
-                f"checks {left+1}+{right+1}: {','.join(spans) if spans else 'none'}"
-            )
-
-    if not candidates:
-        raise RuntimeError(
-            f'No {minimum}-draw contiguous 2-of-{len(reads)} consensus; '
-            + '; '.join(pair_diagnostics)
-        )
-
-    chosen=max(candidates,key=lambda x:(x['lastDraw'],x['length']))
-    diagnostics={
-        'checks':[chosen['left'],chosen['right']],
-        'stableDraws':chosen['length'],
-        'firstDraw':int(chosen['records'][0]['draw']),
-        'lastDraw':chosen['lastDraw']
-    }
+                    tail=run[-tail_size:]; candidates.append({'left':left+1,'right':right+1,'records':tail,'lastDraw':int(tail[-1]['draw']),'length':len(tail)})
+            pair_diagnostics.append(f"checks {left+1}+{right+1}: {','.join(spans) if spans else 'none'}")
+    if not candidates:raise RuntimeError(f'No {minimum}-draw contiguous 2-of-{len(reads)} consensus; '+'; '.join(pair_diagnostics))
+    chosen=max(candidates,key=lambda x:(x['lastDraw'],x['length'])); diagnostics={'checks':[chosen['left'],chosen['right']],'stableDraws':chosen['length'],'firstDraw':int(chosen['records'][0]['draw']),'lastDraw':chosen['lastDraw']}
     return chosen['records'],diagnostics
 
 async def stable_tail(page):
     reads=[]
     for check in range(1,4):
         x=await collect(page)
-        if len(x)<TAIL_SIZE:
-            raise RuntimeError(f'Only {len(x)} recent draws found')
+        if len(x)<TAIL_SIZE:raise RuntimeError(f'Only {len(x)} recent draws found')
         reads.append(x)
-        if check<3:
-            await page.wait_for_timeout(900)
+        if check<3:await page.wait_for_timeout(900)
+    stable,diagnostics=choose_stable_consensus(reads); print('Stable tail consensus: '+json.dumps(diagnostics,ensure_ascii=False)); return stable
 
-    stable,diagnostics=choose_stable_consensus(reads)
-    print('Stable tail consensus: '+json.dumps(diagnostics,ensure_ascii=False))
-    return stable
-
-def header_map(rows):
-    return {str(v):i for i,v in enumerate(rows[0]) if i>0 and v is not None}
-
+def header_map(rows):return {str(v):i for i,v in enumerate(rows[0]) if i>0 and v is not None}
 def ensure_date_row(rows,ds):
     for i,r in enumerate(rows[1:],1):
         if str(r[0])==ds:return i
-    row=[None]*len(rows[0]); row[0]=ds; rows.append(row)
-    return len(rows)-1
+    row=[None]*len(rows[0]); row[0]=ds; rows.append(row); return len(rows)-1
 
 def update_excel(added):
     if not added:return
-    wb=load_workbook(ARCHIVE_XLSX)
-    ws=wb[wb.sheetnames[0]]
-
-    xh={}
+    wb=load_workbook(ARCHIVE_XLSX); ws=wb[wb.sheetnames[0]]; xh={}
     for c in range(2,ws.max_column+1):
         v=ws.cell(1,c).value
-        if isinstance(v,(dt_time,datetime)):
-            t=v.strftime('%H:%M')
+        if isinstance(v,(dt_time,datetime)):t=v.strftime('%H:%M')
         else:
-            m=re.match(r'^(\d{1,2}):(\d{2})',norm(v))
-            t=f'{int(m.group(1)):02d}:{m.group(2)}' if m else None
+            m=re.match(r'^(\d{1,2}):(\d{2})',norm(v)); t=f'{int(m.group(1)):02d}:{m.group(2)}' if m else None
         if t:xh[t]=c
-
     rows_by={}
     for r in range(2,ws.max_row+1):
         v=ws.cell(r,1).value
-        if isinstance(v,(date,datetime)):
-            k=v.strftime('%d.%m.%y')
+        if isinstance(v,(date,datetime)):k=v.strftime('%d.%m.%y')
         else:
-            d=parse_archive_date(v)
-            k=d.strftime('%d.%m.%y') if d else norm(v)
+            d=parse_archive_date(v); k=d.strftime('%d.%m.%y') if d else norm(v)
         if k:rows_by[k]=r
-
     for x in added:
         c=xh.get(x['time'])
         if c is None:continue
         r=rows_by.get(x['date'])
         if r is None:
             r=ws.max_row+1; src=max(2,r-1)
-            for cc in range(1,ws.max_column+1):
-                ws.cell(r,cc)._style=copy.copy(ws.cell(src,cc)._style)
+            for cc in range(1,ws.max_column+1):ws.cell(r,cc)._style=copy.copy(ws.cell(src,cc)._style)
             ws.cell(r,1).value=x['date']; rows_by[x['date']]=r
         cur=valid_col(ws.cell(r,c).value)
-        if cur is not None and cur!=x['column']:
-            raise RuntimeError(f'Excel conflict {x}')
+        if cur is not None and cur!=x['column']:raise RuntimeError(f'Excel conflict {x}')
         ws.cell(r,c).value=x['column']
-
     wb.save(ARCHIVE_XLSX)
 
 async def main():
-    email=os.getenv('STOLOTO_EMAIL','').strip()
-    password=os.getenv('STOLOTO_PASSWORD','').strip()
-    if not email or not password:
-        raise RuntimeError('Set STOLOTO_EMAIL and STOLOTO_PASSWORD secrets')
-
+    email=os.getenv('STOLOTO_EMAIL','').strip(); password=os.getenv('STOLOTO_PASSWORD','').strip()
+    if not email or not password:raise RuntimeError('Set STOLOTO_EMAIL and STOLOTO_PASSWORD secrets')
     async with async_playwright() as p:
         browser=await p.chromium.launch(headless=True)
         try:
-            ctx=await browser.new_context(
-                locale='ru-RU',
-                timezone_id='Europe/Moscow',
-                viewport={'width':390,'height':844}
-            )
-            page=await ctx.new_page()
-            await login(page,email,password)
-            stable=await stable_tail(page)
-        finally:
-            await browser.close()
-
-    archive=json.loads(ARCHIVE_JSON.read_text(encoding='utf-8'))
-    rows=archive['rows']; hm=header_map(rows); added=[]; confirmed=0
-
+            ctx=await browser.new_context(locale='ru-RU',timezone_id='Europe/Moscow',viewport={'width':390,'height':844}); page=await ctx.new_page(); await login(page,email,password); stable=await stable_tail(page)
+        finally:await browser.close()
+    archive=json.loads(ARCHIVE_JSON.read_text(encoding='utf-8')); rows=archive['rows']; hm=header_map(rows); added=[]; confirmed=0
     for x in stable:
         c=hm.get(x['time'])
         if c is None:continue
-        r=ensure_date_row(rows,x['date'])
-        cur=valid_col(rows[r][c])
-
-        if cur is None:
-            rows[r][c]=x['column']; added.append(x)
-        elif cur==x['column']:
-            confirmed+=1
-        else:
-            raise RuntimeError(
-                f"Archive conflict {x['date']} {x['time']}: {cur} != {x['column']}"
-            )
-
+        r=ensure_date_row(rows,x['date']); cur=valid_col(rows[r][c])
+        if cur is None:rows[r][c]=x['column']; added.append(x)
+        elif cur==x['column']:confirmed+=1
+        else:raise RuntimeError(f"Archive conflict {x['date']} {x['time']}: {cur} != {x['column']}")
     if added:
-        ARCHIVE_JSON.write_text(
-            json.dumps(archive,ensure_ascii=False,separators=(',',':'))+'\n',
-            encoding='utf-8'
-        )
-        update_excel(added)
-
+        ARCHIVE_JSON.write_text(json.dumps(archive,ensure_ascii=False,separators=(',',':'))+'\n',encoding='utf-8'); update_excel(added)
     last=stable[-1]
-    LAST_SYNC.write_text(
-        json.dumps({
-            'updatedAt':datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),
-            'source':'Stoloto OAuth M5M tail 2-of-3 consensus + fallback parser',
-            'stableDraws':len(stable),
-            'confirmedExisting':confirmed,
-            'added':len(added),
-            'latestOfficial':last,
-            'addedRows':added
-        },ensure_ascii=False,indent=2)+'\n',
-        encoding='utf-8'
-    )
+    LAST_SYNC.write_text(json.dumps({'updatedAt':datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),'source':'Stoloto OAuth M5M tail 2-of-3 consensus + fallback parser','stableDraws':len(stable),'confirmedExisting':confirmed,'added':len(added),'latestOfficial':last,'addedRows':added},ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print(f"M5M PASS: added={len(added)}, confirmed={confirmed}, latest={last}")
 
 if __name__=='__main__':
-    try:
-        asyncio.run(main())
+    try:asyncio.run(main())
     except Exception as e:
-        print(f'FAIL: {e}',file=sys.stderr)
-        raise
+        print(f'FAIL: {e}',file=sys.stderr); raise
