@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'APPLY_M5M_ALGO_DAYS_V128.py'
+      - '.github/workflows/apply-m5m-algo-days-v128.yml'
   workflow_dispatch: {}
 
 permissions:
