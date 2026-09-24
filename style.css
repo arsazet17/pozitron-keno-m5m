@@ -124,3 +124,34 @@
 }
 .m5m-splash-hide{opacity:0}
 
+
+
+/* v1.2.7 — управление глубиной истории матрицы */
+.algo-pending-tools{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center
+}
+.algo-count-box{
+  min-width:132px;padding:9px 10px;border:1px solid rgba(85,214,255,.24);
+  border-radius:13px;background:#091827;text-align:center
+}
+.algo-count-box>span{
+  display:block;margin-bottom:6px;color:var(--cyan);font-size:10px;font-weight:900;
+  letter-spacing:.08em;text-transform:uppercase
+}
+.algo-count-stepper{display:grid;grid-template-columns:30px 58px 30px;gap:5px;align-items:center;justify-content:center}
+.algo-count-stepper button{
+  width:30px;height:30px;padding:0;border:1px solid #315373;border-radius:9px;
+  background:#11263d;color:#eef6ff;font-size:18px;font-weight:900;line-height:1
+}
+.algo-count-stepper input{
+  width:58px;height:30px;padding:3px 5px;border:1px solid #315373;border-radius:9px;
+  background:#061523;color:var(--gold);text-align:center;font-size:15px;font-weight:900
+}
+.algo-count-box small{display:block;margin-top:5px;color:var(--muted);font-size:9px;white-space:nowrap}
+@media(max-width:420px){
+  .algo-pending-tools{grid-template-columns:minmax(0,1fr) 126px;gap:9px}
+  .algo-count-box{min-width:126px;padding:8px 7px}
+  .algo-count-stepper{grid-template-columns:28px 54px 28px;gap:4px}
+  .algo-count-stepper button{width:28px;height:28px}
+  .algo-count-stepper input{width:54px;height:28px}
+}

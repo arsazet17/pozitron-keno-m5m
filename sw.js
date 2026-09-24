@@ -1,4 +1,4 @@
-const CACHE='m5m-runtime-direct-v8-20260822';
+const CACHE='m5m-runtime-direct-v9-20260924';
 
 const ASSETS=[
   './assets/m5m-splash-cat-original.png',

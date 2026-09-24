@@ -10,6 +10,12 @@
   let matrix=null;
   let lastGeneration='';
   let refreshing=false;
+  const ALGO_HISTORY_COUNT_KEY='m5mAlgoHistoryCountV1';
+  let algoHistoryCount=20;
+  try{
+    const saved=Math.floor(Number(localStorage.getItem(ALGO_HISTORY_COUNT_KEY)));
+    if(Number.isFinite(saved)&&saved>0)algoHistoryCount=saved;
+  }catch(e){}
 
   function toast(x){
     const t=$('toast'); if(!t)return;
@@ -95,14 +101,43 @@
     for(const d of box.querySelectorAll('details.history-item'))if(opened.has(d.dataset.key))d.open=true;
   }
 
+  function algoHistoryMax(){
+    const published=Number(runtime?.history?.length)||0;
+    return Math.max(1,Math.min(300,published||300));
+  }
+  function normalizedAlgoHistoryCount(v=algoHistoryCount){
+    const n=Math.floor(Number(v));
+    return Math.max(1,Math.min(algoHistoryMax(),Number.isFinite(n)?n:20));
+  }
+  function syncAlgoHistoryControl(){
+    const input=$('algoHistoryCount');
+    if(!input)return;
+    algoHistoryCount=normalizedAlgoHistoryCount(algoHistoryCount);
+    input.max=String(algoHistoryMax());
+    if(document.activeElement!==input)input.value=String(algoHistoryCount);
+    const label=$('algoHistoryShown');
+    if(label)label.textContent=`из ${runtime?.history?.length||0}`;
+  }
+  function setAlgoHistoryCount(v){
+    algoHistoryCount=normalizedAlgoHistoryCount(v);
+    try{localStorage.setItem(ALGO_HISTORY_COUNT_KEY,String(algoHistoryCount));}catch(e){}
+    syncAlgoHistoryControl();
+    if(runtime)renderMatrix();
+  }
   function renderMatrix(){
-    const fin=(runtime?.history||[]).slice().reverse();
-    const dates=[...new Set(fin.map(x=>x.date))].slice(-8);
-    const byKey=new Map(fin.map(r=>[`${r.date}|${r.time}`,r]));
-    let html='<table class="algo-matrix"><thead><tr><th>Дата</th>'+E.SCHEDULE.map(t=>`<th>${t}</th>`).join('')+'</tr></thead><tbody>';
+    const all=Array.isArray(runtime?.history)?runtime.history:[];
+    const limit=normalizedAlgoHistoryCount();
+    const selected=all.slice(0,limit);
+    const chronological=[...selected].reverse();
+    const dates=[...new Set(chronological.map(x=>x.date))];
+    const visibleTimes=new Set(selected.map(x=>x.time));
+    const times=E.SCHEDULE.filter(t=>visibleTimes.has(t));
+    const byKey=new Map(selected.map(r=>[`${r.date}|${r.time}`,r]));
+    const minWidth=Math.max(620,118+times.length*108);
+    let html=`<table class="algo-matrix" style="min-width:${minWidth}px"><thead><tr><th>Дата</th>`+times.map(t=>`<th>${t}</th>`).join('')+'</tr></thead><tbody>';
     for(const d of dates){
       html+=`<tr><th>${d}<small>${E.weekday(d)}</small></th>`;
-      for(const t of E.SCHEDULE){
+      for(const t of times){
         const r=byKey.get(`${d}|${t}`);
         html+=r?`<td title="${esc(r.criterion)}"><b>${r.actual}</b><small>${esc(r.criterion)}</small><em>cov ${r.coverage} · raw ${r.raw_total} · d ${r.depth} · rep ${r.repeat_count}</em></td>`:'<td></td>';
       }
@@ -112,7 +147,8 @@
     $('algoMatrix').innerHTML=html;
     const p=runtime?.pending;
     $('algoPending').innerHTML=p?`<b>${p.date} · ${p.weekday} · ${p.time}</b><span>🔒 SERVER RAW + повторы + M5 SCORE сохранены до факта</span>`:'Нет ожидающего снимка';
-    $('algoMeta').textContent=`снимков ${p?1:0} · завершено ${runtime?.totals?.finalized??0} · SERVER LIVE`;
+    $('algoMeta').textContent=`показано ${selected.length} · завершено ${runtime?.totals?.finalized??0} · SERVER LIVE`;
+    syncAlgoHistoryControl();
   }
 
   function fillControls(){
@@ -136,10 +172,22 @@
     refreshing=true;
     try{
       const x=await loadRuntime();
+      const first=!runtime;
       const changed=x.generation!==lastGeneration;
+      const keepScroll=document.querySelector('.page.active')?.dataset.page==='algorithm';
+      const scrollY=keepScroll?window.scrollY:null;
       runtime=x; forecast=x.forecast; lastGeneration=x.generation;
-      renderAll();
-      window.dispatchEvent(new CustomEvent('m5:forecast',{detail:{forecast,reason,generation:x.generation}}));
+
+      // Автоопрос сервера не должен каждые 10 секунд пересобирать DOM.
+      // Перерисовываем только первый экран или действительно новый generation.
+      if(first||changed){
+        renderAll();
+        window.dispatchEvent(new CustomEvent('m5:forecast',{detail:{forecast,reason,generation:x.generation}}));
+        if(keepScroll&&scrollY!=null){
+          requestAnimationFrame(()=>window.scrollTo({top:scrollY,left:0,behavior:'auto'}));
+        }
+      }
+
       if(show||changed)toast(`M5 LIVE · база ${x.totals.finalized} · ${forecast.target.time}`);
     }catch(e){
       console.error(e);
@@ -159,6 +207,18 @@
     matrix=E.cloneMatrix(j.rows);
     return matrix;
   }
+
+  const algoCountInput=$('algoHistoryCount');
+  if(algoCountInput){
+    algoCountInput.addEventListener('change',()=>setAlgoHistoryCount(algoCountInput.value));
+    algoCountInput.addEventListener('blur',()=>setAlgoHistoryCount(algoCountInput.value));
+    algoCountInput.addEventListener('keydown',e=>{
+      if(e.key==='Enter'){e.preventDefault();algoCountInput.blur();}
+    });
+  }
+  if($('algoCountMinus'))$('algoCountMinus').addEventListener('click',()=>setAlgoHistoryCount(algoHistoryCount-1));
+  if($('algoCountPlus'))$('algoCountPlus').addEventListener('click',()=>setAlgoHistoryCount(algoHistoryCount+1));
+  syncAlgoHistoryControl();
 
   $('recalc').addEventListener('click',()=>refresh('manual',true));
   $('forceUpdate').addEventListener('click',()=>refresh('force',true));
