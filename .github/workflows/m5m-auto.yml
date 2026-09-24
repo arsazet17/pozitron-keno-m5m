@@ -66,13 +66,13 @@ jobs:
 
       - name: Commit data immediately
         run: |
-          if [ -z "$(git status --porcelain --             data/archive.json             data/m5m_stolby_po_date_vremeni.xlsx             data/last_sync.json             data/m5-server-state.json             data/m5-server-status.json             data/m5-runtime.json)" ]; then
+          if [ -z "$(git status --porcelain --             data/archive.json             data/m5m_stolby_po_date_vremeni.xlsx             data/last_sync.json             data/m5-server-state.json             data/m5-server-status.json             data/m5-runtime.json             data/m5-algorithm-history.json)" ]; then
             echo "No changes"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add             data/archive.json             data/m5m_stolby_po_date_vremeni.xlsx             data/last_sync.json             data/m5-server-state.json             data/m5-server-status.json             data/m5-runtime.json
+          git add             data/archive.json             data/m5m_stolby_po_date_vremeni.xlsx             data/last_sync.json             data/m5-server-state.json             data/m5-server-status.json             data/m5-runtime.json             data/m5-algorithm-history.json
           git commit -m "M5M · atomic Stoloto runtime"
           git fetch origin main
           git rebase origin/main
