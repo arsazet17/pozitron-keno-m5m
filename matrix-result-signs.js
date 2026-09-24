@@ -17,11 +17,12 @@
       const table = document.querySelector('#algoMatrix table.algo-matrix');
       const app = window.M5App;
       const runtime = app && app.getRuntime ? app.getRuntime() : null;
-      if(!table || !runtime || !Array.isArray(runtime.history)) return;
+      const fullHistory = app && app.getAlgorithmHistory ? app.getAlgorithmHistory() : runtime?.history;
+      if(!table || !runtime || !Array.isArray(fullHistory)) return;
 
       const headers = [...table.querySelectorAll('thead th')];
       const schedule = headers.slice(1).map(th => th.textContent.trim());
-      const byKey = new Map(runtime.history.map(r => [`${r.date}|${r.time}`, r]));
+      const byKey = new Map(fullHistory.map(r => [`${r.date}|${r.time}`, r]));
 
       for(const tr of table.querySelectorAll('tbody tr')){
         const dateCell = tr.querySelector('th');
@@ -69,6 +70,7 @@
 
   // app.js сам сообщает, когда новый runtime уже отрисован.
   window.addEventListener('m5:forecast', ()=>setTimeout(decorate, 0));
+  window.addEventListener('m5:algo-history', ()=>setTimeout(decorate, 0));
   window.addEventListener('focus', decorate);
   document.addEventListener('visibilitychange', ()=>{
     if(!document.hidden) decorate();

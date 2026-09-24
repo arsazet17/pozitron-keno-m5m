@@ -10,11 +10,13 @@
   let matrix=null;
   let lastGeneration='';
   let refreshing=false;
-  const ALGO_HISTORY_COUNT_KEY='m5mAlgoHistoryCountV1';
-  let algoHistoryCount=20;
+  const ALGO_DAY_COUNT_KEY='m5mAlgoDayCountV1';
+  let algoDayCount=5;
+  let algoHistory=null;
+  let algoHistoryLoading=false;
   try{
-    const saved=Math.floor(Number(localStorage.getItem(ALGO_HISTORY_COUNT_KEY)));
-    if(Number.isFinite(saved)&&saved>0)algoHistoryCount=saved;
+    const saved=Math.floor(Number(localStorage.getItem(ALGO_DAY_COUNT_KEY)));
+    if(Number.isFinite(saved)&&saved>0)algoDayCount=saved;
   }catch(e){}
 
   function toast(x){
@@ -101,38 +103,54 @@
     for(const d of box.querySelectorAll('details.history-item'))if(opened.has(d.dataset.key))d.open=true;
   }
 
-  function algoHistoryMax(){
-    const published=Number(runtime?.history?.length)||0;
-    return Math.max(1,Math.min(300,published||300));
+  function algoRows(){
+    return Array.isArray(algoHistory)&&algoHistory.length ? algoHistory : (runtime?.history||[]);
   }
-  function normalizedAlgoHistoryCount(v=algoHistoryCount){
+  function algoDates(){
+    const rows=[...algoRows()].reverse();
+    return [...new Set(rows.map(x=>x.date).filter(Boolean))];
+  }
+  function algoDayMax(){ return Math.max(1,algoDates().length||1); }
+  function normalizedAlgoDayCount(v=algoDayCount){
     const n=Math.floor(Number(v));
-    return Math.max(1,Math.min(algoHistoryMax(),Number.isFinite(n)?n:20));
+    return Math.max(1,Math.min(algoDayMax(),Number.isFinite(n)?n:5));
   }
   function syncAlgoHistoryControl(){
-    const input=$('algoHistoryCount');
-    if(!input)return;
-    algoHistoryCount=normalizedAlgoHistoryCount(algoHistoryCount);
-    input.max=String(algoHistoryMax());
-    if(document.activeElement!==input)input.value=String(algoHistoryCount);
+    const input=$('algoHistoryCount'); if(!input)return;
+    algoDayCount=normalizedAlgoDayCount(algoDayCount);
+    input.max=String(algoDayMax());
+    if(document.activeElement!==input)input.value=String(algoDayCount);
     const label=$('algoHistoryShown');
-    if(label)label.textContent=`из ${runtime?.history?.length||0}`;
+    if(label)label.textContent=`из ${algoDayMax()}`;
   }
-  function setAlgoHistoryCount(v){
-    algoHistoryCount=normalizedAlgoHistoryCount(v);
-    try{localStorage.setItem(ALGO_HISTORY_COUNT_KEY,String(algoHistoryCount));}catch(e){}
+  function setAlgoDayCount(v){
+    algoDayCount=normalizedAlgoDayCount(v);
+    try{localStorage.setItem(ALGO_DAY_COUNT_KEY,String(algoDayCount));}catch(e){}
     syncAlgoHistoryControl();
     if(runtime)renderMatrix();
   }
+  async function ensureAlgoHistory(){
+    if(algoHistory||algoHistoryLoading)return;
+    algoHistoryLoading=true;
+    try{
+      const x=await fetchJSON('data/m5-algorithm-history.json');
+      if(!Array.isArray(x?.history)||!x.history.length)throw new Error('пустая история алгоритма');
+      algoHistory=x.history;
+      syncAlgoHistoryControl();
+      renderMatrix();
+      window.dispatchEvent(new CustomEvent('m5:algo-history'));
+    }catch(e){ console.warn('M5 algorithm history:',e); }
+    finally{algoHistoryLoading=false;}
+  }
   function renderMatrix(){
-    const all=Array.isArray(runtime?.history)?runtime.history:[];
-    const limit=normalizedAlgoHistoryCount();
-    const selected=all.slice(0,limit);
-    const chronological=[...selected].reverse();
-    const dates=[...new Set(chronological.map(x=>x.date))];
-    const visibleTimes=new Set(selected.map(x=>x.time));
-    const times=E.SCHEDULE.filter(t=>visibleTimes.has(t));
+    const all=algoRows();
+    const allDates=algoDates();
+    const dayLimit=normalizedAlgoDayCount();
+    const dates=allDates.slice(-dayLimit);
+    const dateSet=new Set(dates);
+    const selected=all.filter(r=>dateSet.has(r.date));
     const byKey=new Map(selected.map(r=>[`${r.date}|${r.time}`,r]));
+    const times=E.SCHEDULE;
     const minWidth=Math.max(620,118+times.length*108);
     let html=`<table class="algo-matrix" style="min-width:${minWidth}px"><thead><tr><th>Дата</th>`+times.map(t=>`<th>${t}</th>`).join('')+'</tr></thead><tbody>';
     for(const d of dates){
@@ -147,7 +165,7 @@
     $('algoMatrix').innerHTML=html;
     const p=runtime?.pending;
     $('algoPending').innerHTML=p?`<b>${p.date} · ${p.weekday} · ${p.time}</b><span>🔒 SERVER RAW + повторы + M5 SCORE сохранены до факта</span>`:'Нет ожидающего снимка';
-    $('algoMeta').textContent=`показано ${selected.length} · завершено ${runtime?.totals?.finalized??0} · SERVER LIVE`;
+    $('algoMeta').textContent=`дней ${dates.length} · тиражей ${selected.length} · завершено ${runtime?.totals?.finalized??0}`;
     syncAlgoHistoryControl();
   }
 
@@ -210,15 +228,18 @@
 
   const algoCountInput=$('algoHistoryCount');
   if(algoCountInput){
-    algoCountInput.addEventListener('change',()=>setAlgoHistoryCount(algoCountInput.value));
-    algoCountInput.addEventListener('blur',()=>setAlgoHistoryCount(algoCountInput.value));
+    algoCountInput.addEventListener('change',()=>setAlgoDayCount(algoCountInput.value));
+    algoCountInput.addEventListener('blur',()=>setAlgoDayCount(algoCountInput.value));
     algoCountInput.addEventListener('keydown',e=>{
       if(e.key==='Enter'){e.preventDefault();algoCountInput.blur();}
     });
   }
-  if($('algoCountMinus'))$('algoCountMinus').addEventListener('click',()=>setAlgoHistoryCount(algoHistoryCount-1));
-  if($('algoCountPlus'))$('algoCountPlus').addEventListener('click',()=>setAlgoHistoryCount(algoHistoryCount+1));
+  if($('algoCountMinus'))$('algoCountMinus').addEventListener('click',()=>setAlgoDayCount(algoDayCount-1));
+  if($('algoCountPlus'))$('algoCountPlus').addEventListener('click',()=>setAlgoDayCount(algoDayCount+1));
   syncAlgoHistoryControl();
+
+  const algoNav=document.querySelector('.nav-btn[data-target="algorithm"]');
+  if(algoNav)algoNav.addEventListener('click',()=>ensureAlgoHistory());
 
   $('recalc').addEventListener('click',()=>refresh('manual',true));
   $('forceUpdate').addEventListener('click',()=>refresh('force',true));
@@ -264,6 +285,7 @@
   window.M5App={
     getForecast:()=>forecast,
     getRuntime:()=>runtime,
+    getAlgorithmHistory:()=>algoRows().slice(),
     getMatrix:()=>matrix?E.cloneMatrix(matrix):null,
     refresh
   };

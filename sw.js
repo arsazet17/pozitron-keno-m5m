@@ -18,6 +18,7 @@ const ASSETS=[
 const RAW_BASE='https://raw.githubusercontent.com/arsazet17/pozitron-keno-m5m/main/';
 const DIRECT={
   '/data/m5-runtime.json':'data/m5-runtime.json',
+  '/data/m5-algorithm-history.json':'data/m5-algorithm-history.json',
   '/data/archive.json':'data/archive.json',
   '/data/m5-server-state.json':'data/m5-server-state.json',
   '/data/m5-server-status.json':'data/m5-server-status.json',

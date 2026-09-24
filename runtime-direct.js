@@ -7,6 +7,7 @@
 
   const LIVE_FILES = new Set([
     'data/m5-runtime.json',
+    'data/m5-algorithm-history.json',
     'data/archive.json',
     'data/m5-server-state.json',
     'data/m5-server-status.json',

@@ -8,6 +8,7 @@ const ARCHIVE=path.join(DATA,'archive.json');
 const STATE=path.join(DATA,'m5-server-state.json');
 const SYNC=path.join(DATA,'last_sync.json');
 const RUNTIME=path.join(DATA,'m5-runtime.json');
+const ALGO_HISTORY=path.join(DATA,'m5-algorithm-history.json');
 
 require(path.join(ROOT,'m5-engine.js'));
 const E=globalThis.M5Engine;
@@ -77,6 +78,12 @@ const historyRows=Number(forecast.model?.historyRows);
 if(!Number.isFinite(historyRows)||historyRows<1)throw new Error('M5 model.historyRows некорректен');
 
 const generation=`${latest.draw}|${latest.date}|${latest.time}|${latest.column}|${historyRows}|${target.date}|${target.time}`;
+const algoHist=Object.values(state.finalized||{})
+  .filter(r=>r?.date&&r?.time&&timeValue(r.date,r.time)<=timeValue(latest.date,latest.time))
+  .sort((a,b)=>timeValue(b.date,b.time)-timeValue(a.date,a.time))
+  .slice(0,1800)
+  .map(r=>compactHistory(r,drawByKey.get(key(r.date,r.time))));
+atomic(ALGO_HISTORY,{version:1,generation,generatedAt:new Date().toISOString(),history:algoHist});
 const runtime={
   version:4,
   generation,
