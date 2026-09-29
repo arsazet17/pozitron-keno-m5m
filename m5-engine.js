@@ -21,7 +21,30 @@
   function headerMap(matrix){const m={};(matrix[0]||[]).forEach((x,i)=>{if(i>0&&x!=null)m[String(x)]=i;});return m;}
   function ensureDateRow(matrix,date){let i=matrix.findIndex((r,k)=>k>0&&String(r?.[0])===String(date));if(i>=0)return i;const row=new Array(matrix[0].length).fill(null);row[0]=date;matrix.push(row);return matrix.length-1;}
   function latestDateRow(matrix){for(let i=matrix.length-1;i>=1;i--)if(matrix[i]?.[0])return i;return -1;}
-  function nextTarget(matrix){const hm=headerMap(matrix);let row=latestDateRow(matrix);if(row<1)throw new Error('В архиве нет дат');for(const time of SCHEDULE){const col=hm[time];if(col!=null&&val(matrix[row][col])==null)return{row,date:String(matrix[row][0]),time,col};}const date=shiftDate(String(matrix[row][0]),1);row=ensureDateRow(matrix,date);return{row,date,time:SCHEDULE[0],col:hm[SCHEDULE[0]]};}
+  function latestCompletedSlot(matrix){
+    const hm=headerMap(matrix);let best=null;
+    for(let r=1;r<matrix.length;r++){
+      const date=String(matrix[r]?.[0]||''),d=parseDate(date);if(!d)continue;
+      for(let i=0;i<SCHEDULE.length;i++){
+        const time=SCHEDULE[i],col=hm[time];if(col==null||val(matrix[r][col])==null)continue;
+        const stamp=d.getTime()*100+i;
+        if(!best||stamp>best.stamp)best={row:r,date,time,col,index:i,stamp};
+      }
+    }
+    return best;
+  }
+  function nextTarget(matrix){
+    const hm=headerMap(matrix),last=latestCompletedSlot(matrix);
+    if(!last){
+      const row=latestDateRow(matrix);if(row<1)throw new Error('В архиве нет дат');
+      const time=SCHEDULE[0],col=hm[time];if(col==null)throw new Error(`В архиве нет столбца ${time}`);
+      return{row,date:String(matrix[row][0]),time,col};
+    }
+    let row=last.row,date=last.date,i=last.index+1;
+    if(i>=SCHEDULE.length){date=shiftDate(last.date,1);row=ensureDateRow(matrix,date);i=0;}
+    const time=SCHEDULE[i],col=hm[time];if(col==null)throw new Error(`В архиве нет столбца ${time}`);
+    return{row,date,time,col};
+  }
   function applyOverrides(matrix,overrides){const hm=headerMap(matrix);for(const [k,v] of Object.entries(overrides||{})){const [date,time]=k.split('|'),n=val(v),c=hm[time];if(n==null||c==null)continue;const r=ensureDateRow(matrix,date);matrix[r][c]=n;}return matrix;}
   function getVal(matrix,date,time){const hm=headerMap(matrix),c=hm[time];if(c==null)return null;const r=matrix.findIndex((x,i)=>i>0&&String(x?.[0])===String(date));return r<1?null:val(matrix[r][c]);}
   function slotShift(date,time,delta){let i=SCHEDULE.indexOf(time),d=date;if(i<0)return{date,time};let j=i+delta;while(j<0){d=shiftDate(d,-1);j+=SCHEDULE.length;}while(j>=SCHEDULE.length){d=shiftDate(d,1);j-=SCHEDULE.length;}return{date:d,time:SCHEDULE[j]};}
