@@ -245,6 +245,26 @@ function completedSlots(matrix){
   out.sort((a,b)=>timeValue(a.date,a.time)-timeValue(b.date,b.time));
   return out;
 }
+function pruneStalePending(state,matrix){
+  const all=completedSlots(matrix);
+  if(!all.length) return 0;
+  const latest=all[all.length-1];
+  const latestTime=timeValue(latest.date,latest.time);
+  let removed=0;
+  for(const [k,snap] of Object.entries({...state.snapshots})){
+    if(state.finalized[k]){
+      delete state.snapshots[k];
+      continue;
+    }
+    const actual=E.getVal(matrix,snap.date,snap.time);
+    if(actual==null && timeValue(snap.date,snap.time)<latestTime){
+      delete state.snapshots[k];
+      removed++;
+      console.log(`M5 PRUNE STALE PENDING ${k} before ${latest.k}`);
+    }
+  }
+  return removed;
+}
 function historicalMatrix(full,date,time){
   const out=E.cloneMatrix(full);
   const cut=timeValue(date,time);
@@ -351,6 +371,7 @@ const finalizedNow=reconcileExistingPending(state,matrix);
 // 2. Идём только от последней сохранённой строки истории вперёд.
 //    Никаких 120 тиражей назад.
 const catchup=catchUpFromLastSaved(state,matrix);
+const prunedStale=pruneStalePending(state,matrix);
 trimFinalized(state);
 
 // 3. Создаём текущий настоящий прогноз на следующий активный тираж.
@@ -395,16 +416,18 @@ writeJsonAtomic(STATUS,{
   finalizedNow,
   restoredNow:catchup.restored,
   checkedMissingNow:catchup.checked,
+  prunedStaleNow:prunedStale,
   totals:{
     pending:Object.keys(state.snapshots).length,
     finalized:Object.keys(state.finalized).length
   },
-  rule:'История идёт непрерывно только вперёд: от последней сохранённой строки до последнего фактического тиража. Если пропусков нет — ничего лишнего не пересчитывается.'
+  rule:'История идёт непрерывно только вперёд: от последней сохранённой строки до последнего фактического тиража. Старые пустые pending до последнего факта автоматически удаляются.'
 });
 
 console.log(
   `M5 SERVER OK target=${targetKey} ` +
   `pending=${Object.keys(state.snapshots).length} ` +
   `finalized=${Object.keys(state.finalized).length} ` +
-  `restored=${catchup.restored}`
+  `restored=${catchup.restored} ` +
+  `pruned=${prunedStale}`
 );
