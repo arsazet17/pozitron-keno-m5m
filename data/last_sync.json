@@ -1,14 +1,27 @@
 {
-  "updatedAt": "2026-10-27T18:08:14Z",
+  "updatedAt": "2026-10-27T18:25:49Z",
   "source": "Stoloto OAuth M5M tail 2-of-3 consensus + fallback parser",
   "stableDraws": 10,
-  "confirmedExisting": 10,
-  "added": 0,
+  "confirmedExisting": 8,
+  "added": 2,
   "latestOfficial": {
-    "draw": 330372,
+    "draw": 330374,
     "date": "27.10.26",
-    "time": "20:32",
-    "column": 8
+    "time": "21:17",
+    "column": 9
   },
-  "addedRows": []
+  "addedRows": [
+    {
+      "draw": 330373,
+      "date": "27.10.26",
+      "time": "21:02",
+      "column": 6
+    },
+    {
+      "draw": 330374,
+      "date": "27.10.26",
+      "time": "21:17",
+      "column": 9
+    }
+  ]
 }
