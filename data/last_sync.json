@@ -1,75 +1,14 @@
 {
-  "updatedAt": "2026-10-30T17:06:01Z",
+  "updatedAt": "2026-10-30T17:08:38Z",
   "source": "Stoloto OAuth M5M tail 2-of-3 consensus + fallback parser",
   "stableDraws": 10,
-  "confirmedExisting": 0,
-  "added": 10,
+  "confirmedExisting": 10,
+  "added": 0,
   "latestOfficial": {
     "draw": 330556,
     "date": "30.10.26",
     "time": "19:32",
     "column": 7
   },
-  "addedRows": [
-    {
-      "draw": 330547,
-      "date": "30.10.26",
-      "time": "16:17",
-      "column": 4
-    },
-    {
-      "draw": 330548,
-      "date": "30.10.26",
-      "time": "16:32",
-      "column": 9
-    },
-    {
-      "draw": 330549,
-      "date": "30.10.26",
-      "time": "17:02",
-      "column": 6
-    },
-    {
-      "draw": 330550,
-      "date": "30.10.26",
-      "time": "17:17",
-      "column": 4
-    },
-    {
-      "draw": 330551,
-      "date": "30.10.26",
-      "time": "17:32",
-      "column": 7
-    },
-    {
-      "draw": 330552,
-      "date": "30.10.26",
-      "time": "18:02",
-      "column": 6
-    },
-    {
-      "draw": 330553,
-      "date": "30.10.26",
-      "time": "18:17",
-      "column": 3
-    },
-    {
-      "draw": 330554,
-      "date": "30.10.26",
-      "time": "18:32",
-      "column": 10
-    },
-    {
-      "draw": 330555,
-      "date": "30.10.26",
-      "time": "19:02",
-      "column": 6
-    },
-    {
-      "draw": 330556,
-      "date": "30.10.26",
-      "time": "19:32",
-      "column": 7
-    }
-  ]
+  "addedRows": []
 }
